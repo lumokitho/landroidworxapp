@@ -1,0 +1,211 @@
+﻿@page "/"
+@using LandroidWorxApp.BusinessLogic
+@using Microsoft.Extensions.Configuration
+@using System.Globalization
+@using uPLibrary.Networking.M2Mqtt;
+@using uPLibrary.Networking.M2Mqtt.Messages;
+@inject ILsClientWeb LsClientWeb
+@inject IConfiguration Configuration
+
+
+<div class="row">
+    <div class="col-3 align-self-center battery">
+        <i class="fas fa-battery-@batteryStatus" style="font-size:2em;color:#cc5f28"></i> <span style="vertical-align:super">@data.Battery.Perc%</span>
+        <br />
+        <span class="info">@(data.Battery.Volt)V @(data.Battery.Temp)°</span>
+    </div>
+    <div class="col align-self-center status text-center">
+        <div><b>@data.LastState</b></div>
+        <div><span class="info"><b>Next working hours:&nbsp;</b>@config.NextWorkingHours</span></div>
+    </div>
+    <div class="col-3 align-self-center text-right wifi">
+        <i class="fas fa-wifi" style="font-size:2em;color:#cc5f28"></i>
+        <br />
+        <span class="info">@data.RecvSignal dB</span>
+    </div>
+</div>
+
+<div class="row mt-5">
+    <div class="col align-self-center text-right">
+        <span class="info">Slope: @data.Orient[0]°</span>
+    </div>
+    <div class="col-auto text-center landroid">
+        <img src="/img/landroid.png" alt="Robertino Robottino" />
+    </div>
+    <div class="col align-self-center">
+        <span class="info">Direction: @data.Orient[2]°</span>
+    </div>
+</div>
+<div class="text-center">
+    <span class="info">Roll: @data.Orient[1]°</span>
+</div>
+
+
+<div class="row mt-5">
+    <div class="col-md-6 col-lg-3">
+        <div class="row no-gutters">
+            <div class="col text-right">
+                <span><b>Next Zone:&nbsp;</b></span>
+            </div>
+            <div class="col">
+                <span>@data.LastZone</span>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-lg-3">
+        <div class="row no-gutters">
+            <div class="col text-right">
+                <span><b>Moving Time:&nbsp;</b></span>
+            </div>
+            <div class="col">
+                <span>@TimeSpan.FromMinutes(data.Statistic.Blade).ToString(@"d\d\ h\h\ m\m")</span>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-lg-3">
+        <div class="row no-gutters">
+            <div class="col text-right">
+                <span><b>Distance:&nbsp;</b></span>
+            </div>
+            <div class="col">
+                <span>@data.Statistic.Distance m</span>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-lg-3">
+        <div class="row no-gutters">
+            <div class="col text-right">
+                <span><b>Working time:&nbsp;</b></span>
+            </div>
+            <div class="col">
+                <span>@TimeSpan.FromMinutes(data.Statistic.WorkTime).ToString(@"d\d\ h\h\ m\m")</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="text-center mt-3">
+    <span class="info"><b>Last update:</b>@config.LastUpdate</span> <br />
+    <span class="info">FW: @data.Firmware</span>
+</div>
+
+<div class="row justify-content-center mt-3">
+    <div class="col-auto">
+        <button class="btn btn-primary" @onclick="Start"><i class="fas fa-play"></i> Start</button>
+    </div>
+    <div class="col-auto">
+        <button class="btn btn-danger" @onclick="Stop"><i class="fas fa-square"></i> Stop</button>
+    </div>
+    <div class="col-auto">
+        <button class="btn btn-success" @onclick="GoHome"><i class="fas fa-home"></i> Home</button>
+    </div>
+    <div class="col-auto">
+        <button class="btn btn-secondary" @onclick="GetData"><i class="fas fa-redo-alt"></i> Poll</button>
+    </div>
+</div>
+
+@code{
+    Data data = new Data();
+    Config config = new Config();
+    string batteryStatus = "empty";
+    string bearerToken = string.Empty;
+    string serialNumber = string.Empty;
+    string broker = string.Empty;
+    string cmdInPath = string.Empty;
+    string cmdOutPath = string.Empty;
+
+    protected override async Task OnInitAsync()
+    {
+        await Setup();
+        await GetData();
+    }
+
+    public async Task Setup()
+    {
+        var response = LsClientWeb.Login(new LsClientWeb_LoginRequest()
+        {
+            ClientSecret = Configuration.GetValue<string>("ClientSecret"),
+            GrantType = "password",
+            Scope = "*",
+            Username = "roberto.gualandris@hotmail.it",
+            Password = "ilguala11"
+        });
+
+        var products = LsClientWeb.GetProducts(new LsClientWeb_GetProductsRequest() { BearerToken = response.BearerToken });
+        bearerToken = response.BearerToken;
+        broker = response.BrokerUrl;
+        serialNumber = products.Products.First().SerialNo;
+        cmdInPath = products.Products.First().Topic.CmdIn;
+        cmdOutPath = products.Products.First().Topic.CmdOut;
+    }
+
+    public async Task GetData()
+    {
+        var status = LsClientWeb.GetProductStatus(new LsClientWeb_GetProductStatusRequest() { BearerToken = bearerToken, SerianNumber = serialNumber });
+        data = status.Status.Dat;
+        config = status.Status.Cfg;
+        if (data.Battery.Perc > 90)
+            batteryStatus = "full";
+        else if (data.Battery.Perc > 60)
+            batteryStatus = "three-quarters";
+        else if (data.Battery.Perc > 40)
+            batteryStatus = "half";
+        else if (data.Battery.Perc > 15)
+            batteryStatus = "quarter";
+        else
+            batteryStatus = "empty";
+    }
+
+    public async Task Start()
+    {
+        var response = LsClientWeb.PublishCommand(new LsClientWeb_PublishCommandRequest()
+        {
+            BearerToken = bearerToken,
+            Broker = broker,
+            Handler = Mqtt_MqttMsgPublished,
+            Content = "{\"cmd\":1}",
+            Uuid = Guid.NewGuid().ToString(),
+            CmdInPath = cmdInPath,
+            CmdOutPath = cmdOutPath
+        });
+    }
+
+    public async Task Stop()
+    {
+        var response = LsClientWeb.PublishCommand(new LsClientWeb_PublishCommandRequest()
+        {
+            BearerToken = bearerToken,
+            Broker = broker,
+            Handler = Mqtt_MqttMsgPublished,
+            Content = "{\"cmd\":2}",
+            Uuid = Guid.NewGuid().ToString(),
+            CmdInPath = cmdInPath,
+            CmdOutPath = cmdOutPath
+        });
+    }
+
+    public async Task GoHome()
+    {
+        var response = LsClientWeb.PublishCommand(new LsClientWeb_PublishCommandRequest()
+        {
+            BearerToken = bearerToken,
+            Broker = broker,
+            Handler = Mqtt_MqttMsgPublished,
+            Content = "{\"cmd\":3}",
+            Uuid = Guid.NewGuid().ToString(),
+            CmdInPath = cmdInPath,
+            CmdOutPath = cmdOutPath
+        });
+    }
+
+    public void Mqtt_MqttMsgPublished(object sender, MqttMsgPublishedEventArgs e)
+    {
+        ((MqttClient)sender).Disconnect();
+
+        Invoke(() =>
+        {
+            GetData();
+            StateHasChanged();
+        });
+    }
+}
