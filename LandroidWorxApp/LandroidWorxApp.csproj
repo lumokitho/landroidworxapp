@@ -7,6 +7,7 @@
   </PropertyGroup>
   
   <ItemGroup>
+    <PackageReference Include="HangFire.Core" Version="1.7.6" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="3.0.0-preview7.19362.6" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="3.0.0-preview7.19362.6">
       <PrivateAssets>all</PrivateAssets>
@@ -22,7 +23,7 @@
 
   <ItemGroup>
     <Watch Include="\Pages\*.razor" />
-    <Watch Include="\Pages\*.cshtml"/>
+    <Watch Include="\Pages\*.cshtml" />
   </ItemGroup>
 
 </Project>

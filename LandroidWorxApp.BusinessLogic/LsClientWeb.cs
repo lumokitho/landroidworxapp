@@ -1,4 +1,6 @@
 ﻿
+using LandroidWorxApp.DataLayer;
+using LandroidWorxApp.DataLayer.POCO;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
@@ -17,10 +19,15 @@ namespace LandroidWorxApp.BusinessLogic
     public class LsClientWeb : ILsClientWeb
     {
         private readonly IConfiguration _configuration;
+        private readonly RepoManager _repoManager;
 
-        public LsClientWeb(IConfiguration configuration)
+        public LsClientWeb(IConfiguration configuration, string connectionStringName)
         {
+            // Configuration
             _configuration = configuration;
+
+            // Repository
+            _repoManager = new RepoManager(connectionStringName, configuration);
         }
 
         public LsClientWeb_LoginResponse Login(LsClientWeb_LoginRequest request)
@@ -50,6 +57,10 @@ namespace LandroidWorxApp.BusinessLogic
             }
 
             response.BrokerUrl = GetBrokerEndpoint(response.BearerToken);
+            response.CertWX = GetMqttCertificate(response.BearerToken);
+
+            // Save Userdata on DB
+            _repoManager.GenericOperations.Save(new UserData() { Username = request.Username, X509Certificate2 = Convert.ToBase64String(response.CertWX.Export(X509ContentType.Pkcs12))});
 
             return response;
         }
@@ -91,8 +102,10 @@ namespace LandroidWorxApp.BusinessLogic
 
         public LsClientWeb_PublishCommandResponse PublishCommand (LsClientWeb_PublishCommandRequest request)
         {
-            X509Certificate2 certWX = GetMqttCertificate(request.BearerToken);
-            MqttClient mqtt = new MqttClient(request.Broker, 8883, true, null, certWX, MqttSslProtocols.TLSv1_2);
+            if(request.CertWX == null && !string.IsNullOrEmpty(request.BearerToken))
+                request.CertWX = GetMqttCertificate(request.BearerToken);
+
+            MqttClient mqtt = new MqttClient(request.Broker, 8883, true, null, request.CertWX, MqttSslProtocols.TLSv1_2);
 
             byte code = mqtt.Connect("android-" + request.Uuid);
             Debug.WriteLine(string.Format("Connect '{0} ({1})'", code, mqtt.IsConnected));

@@ -48,7 +48,7 @@
                 <span><b>Next Zone:&nbsp;</b></span>
             </div>
             <div class="col">
-                <span>@data.LastZone</span>
+                <span>@nextZone</span>
             </div>
         </div>
     </div>
@@ -107,6 +107,7 @@
 @code{
     Data data = new Data();
     Config config = new Config();
+    string nextZone = string.Empty;
     string batteryStatus = "empty";
     string bearerToken = string.Empty;
     string serialNumber = string.Empty;
@@ -154,6 +155,8 @@
             batteryStatus = "quarter";
         else
             batteryStatus = "empty";
+
+        nextZone = config.MultiZones[0] > 0 ? (config.MultiZonePercs[data.LastZone] + 1).ToString() : "-";
     }
 
     public async Task Start()

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using static uPLibrary.Networking.M2Mqtt.MqttClient;
 
@@ -23,6 +24,7 @@ namespace LandroidWorxApp.BusinessLogic
     {
         public string BearerToken { get; set; }
         public string BrokerUrl { get; set; }
+        public X509Certificate2 CertWX { get; set; }
     }
 
     public class LsClientWeb_GetProductsRequest : LsClientWeb_Base
@@ -50,6 +52,7 @@ namespace LandroidWorxApp.BusinessLogic
         public string CmdOutPath { get; set; }
         public string Content { get; set; }
         public MqttMsgPublishedEventHandler Handler { get; set; }
+        public X509Certificate2 CertWX { get; set; }
     }
     public class LsClientWeb_PublishCommandResponse
     {
