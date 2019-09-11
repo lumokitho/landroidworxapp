@@ -60,7 +60,7 @@ namespace LandroidWorxApp.BusinessLogic
             response.CertWX = GetMqttCertificate(response.BearerToken);
 
             // Save Userdata on DB
-            _repoManager.GenericOperations.Save(new UserData() { Username = request.Username, X509Certificate2 = Convert.ToBase64String(response.CertWX.Export(X509ContentType.Pkcs12))});
+            _repoManager.GenericOperations.Save(new UserData() { Username = request.Username, X509Certificate2 = Convert.ToBase64String(response.CertWX.Export(X509ContentType.Cert))});
 
             return response;
         }
