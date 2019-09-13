@@ -115,7 +115,7 @@
     string cmdInPath = string.Empty;
     string cmdOutPath = string.Empty;
 
-    protected override async Task OnInitAsync()
+    protected override async Task OnInitializedAsync ()
     {
         await Setup();
         await GetData();
@@ -205,7 +205,7 @@
     {
         ((MqttClient)sender).Disconnect();
 
-        Invoke(() =>
+        InvokeAsync(() =>
         {
             GetData();
             StateHasChanged();
