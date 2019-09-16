@@ -1,2 +1,54 @@
 ﻿@page "/scheduler"
+@using System.Globalization
 
+<div class="row">
+    <div class="days col align-self-center">
+        <ul class="align-content-center nav nav-pills nav-justified" id="pills-tab" role="tablist">
+            <li class="nav-item">
+                <a class="nav-link @(DateTime.Now.DayOfWeek == DayOfWeek.Monday ? "active" : "")" data-toggle="pill" href="scheduler#monday" role="tab" aria-controls="pills-home" aria-selected="true">@CultureInfo.CurrentCulture.DateTimeFormat.AbbreviatedDayNames[(int)DayOfWeek.Monday].ToUpper()</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link @(DateTime.Now.DayOfWeek == DayOfWeek.Tuesday ? "active" : "")" data-toggle="pill" href="scheduler#tuesday" role="tab" aria-controls="pills-profile" aria-selected="false">@CultureInfo.CurrentCulture.DateTimeFormat.AbbreviatedDayNames[(int)DayOfWeek.Tuesday].ToUpper()</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link @(DateTime.Now.DayOfWeek == DayOfWeek.Wednesday ? "active" : "")" data-toggle="pill" href="scheduler#wednesday" role="tab" aria-controls="pills-contact" aria-selected="false">@CultureInfo.CurrentCulture.DateTimeFormat.AbbreviatedDayNames[(int)DayOfWeek.Wednesday].ToUpper()</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link @(DateTime.Now.DayOfWeek == DayOfWeek.Thursday ? "active" : "")" data-toggle="pill" href="scheduler#thursday" role="tab" aria-controls="pills-home" aria-selected="false">@CultureInfo.CurrentCulture.DateTimeFormat.AbbreviatedDayNames[(int)DayOfWeek.Thursday].ToUpper()</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link @(DateTime.Now.DayOfWeek == DayOfWeek.Friday ? "active" : "")" data-toggle="pill" href="scheduler#friday" role="tab" aria-controls="pills-profile" aria-selected="false">@CultureInfo.CurrentCulture.DateTimeFormat.AbbreviatedDayNames[(int)DayOfWeek.Friday].ToUpper()</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link @(DateTime.Now.DayOfWeek == DayOfWeek.Saturday ? "active" : "")" data-toggle="pill" href="scheduler#saturday" role="tab" aria-controls="pills-contact" aria-selected="false">@CultureInfo.CurrentCulture.DateTimeFormat.AbbreviatedDayNames[(int)DayOfWeek.Saturday].ToUpper()</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link @(DateTime.Now.DayOfWeek == DayOfWeek.Sunday ? "active" : "")" data-toggle="pill" href="scheduler#sunday" role="tab" aria-controls="pills-contact" aria-selected="false">@CultureInfo.CurrentCulture.DateTimeFormat.AbbreviatedDayNames[(int)DayOfWeek.Sunday].ToUpper()</a>
+            </li>
+        </ul>
+    </div>
+</div>
+
+<div class="tab-content" id="pills-tabContent">
+    <div class="tab-pane fade @(DateTime.Now.DayOfWeek == DayOfWeek.Monday ? "show active" : "")" id="monday" role="tabpanel" aria-labelledby="pills-home-tab">
+        ...
+    </div>
+    <div class="tab-pane fade @(DateTime.Now.DayOfWeek== DayOfWeek.Tuesday ? "show active" : "")" id="tuesday" role="tabpanel" aria-labelledby="pills-profile-tab">
+
+    </div>
+    <div class="tab-pane fade @(DateTime.Now.DayOfWeek == DayOfWeek.Wednesday ? "show active" : "")" id="wednesday" role="tabpanel" aria-labelledby="pills-contact-tab">
+
+    </div>
+    <div class="tab-pane fade @(DateTime.Now.DayOfWeek == DayOfWeek.Thursday ? "show active" : "")" id="thursday" role="tabpanel" aria-labelledby="pills-contact-tab">
+   
+    </div>
+    <div class="tab-pane fade @(DateTime.Now.DayOfWeek == DayOfWeek.Friday ? "show active" : "")" id="friday" role="tabpanel" aria-labelledby="pills-contact-tab">
+
+    </div>
+    <div class="tab-pane fade @(DateTime.Now.DayOfWeek == DayOfWeek.Saturday ? "show active" : "")" id="saturday" role="tabpanel" aria-labelledby="pills-contact-tab">
+
+    </div>
+    <div class="tab-pane fade @(DateTime.Now.DayOfWeek == DayOfWeek.Sunday ? "show active" : "")" id="sunday" role="tabpanel" aria-labelledby="pills-contact-tab">
+
+    </div>
+</div>
