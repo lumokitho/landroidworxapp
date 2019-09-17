@@ -57,6 +57,8 @@ namespace LandroidWorxApp
 
             // Add the processing server as IHostedService
             //services.AddHangfireServer();
+
+            services.AddServerSideBlazor().AddCircuitOptions(options => { options.DetailedErrors = true; });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

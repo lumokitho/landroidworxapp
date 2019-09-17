@@ -1,5 +1,9 @@
 {
   "version": "1.0",
   "defaultProvider": "cdnjs",
-  "libraries": []
+  "libraries": [{
+  "library": "bootstrap-timepicker@0.5.2",
+  "destination": "wwwroot/lib/bootstrap-timepicker/"
+}
+]
 }

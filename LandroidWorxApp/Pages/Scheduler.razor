@@ -1,6 +1,13 @@
 ﻿@page "/scheduler"
 @using System.Globalization
-<EmbeddedContent BaseType="@(typeof(Tab))" />
+@using LandroidWorxApp.BusinessLogic
+@using Microsoft.Extensions.Configuration
+@using System.Globalization
+@using uPLibrary.Networking.M2Mqtt;
+@using uPLibrary.Networking.M2Mqtt.Messages;
+@inject ILsClientWeb LsClientWeb
+@inject IConfiguration Configuration
+@inject IJSRuntime JSRuntime
 
 <Tabs SelectedTabChanged="OnSelectedTab" IsJustified="true">
     <Tab Name="@DayOfWeek.Monday.ToString()" IsActive="selectedTab == DayOfWeek.Monday">@CultureInfo.CurrentCulture.DateTimeFormat.AbbreviatedDayNames[(int)DayOfWeek.Monday].ToUpper()</Tab>
@@ -13,10 +20,43 @@
 </Tabs>
 <TabsContent @ref="days">
     <TabPanel Name="@DayOfWeek.Monday.ToString()" IsActive="selectedTab == DayOfWeek.Monday">
-        ...
+
     </TabPanel>
     <TabPanel Name="@DayOfWeek.Tuesday.ToString()" IsActive="selectedTab == DayOfWeek.Tuesday">
-        ,,,
+
+        <Row Class="mt-4">
+            <Column ColumnSize="ColumnSize.Is4">
+                <Field>
+                    <FieldLabel>Time Start</FieldLabel>
+                    <TextEdit Class="timepicker" @ref="timeStart" Placeholder="00:00">
+                    </TextEdit>
+                </Field>
+            </Column>
+            <Column ColumnSize="ColumnSize.Is4">
+                <Field>
+                    <FieldLabel>Duration</FieldLabel>
+                    <NumericEdit TValue="int?" />
+                </Field>
+            </Column>
+            @if (config.MultiZones.Count() > 0)
+            {
+                <Column ColumnSize="ColumnSize.Is4">
+                    <Field>
+                        <FieldLabel>Zone</FieldLabel>
+                        <SelectEdit TValue="int">
+                            @foreach (var item in config.MultiZones)
+                            {
+                                if (item > 0)
+                                {
+                                    <SelectItem Value="config.MultiZones.ToList().IndexOf(item)">@config.MultiZones.ToList().IndexOf(item)</SelectItem>
+                                }
+                            }
+                        </SelectEdit>
+                    </Field>
+                </Column>
+            }
+
+        </Row>
     </TabPanel>
     <TabPanel Name="@DayOfWeek.Wednesday.ToString()" IsActive="selectedTab == DayOfWeek.Wednesday">
         ---
@@ -38,6 +78,7 @@
 
 @code
 {
+    TextEdit timeStart;
     DayOfWeek selectedTab = DateTime.Now.DayOfWeek;
     TabsContent days;
 
@@ -45,5 +86,67 @@
     {
         selectedTab = (DayOfWeek)Enum.Parse(typeof(DayOfWeek), tab);
         days.SelectPanel(tab);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+            await JSRuntime.InvokeAsync<object>("renderPickers");
+    }
+
+
+
+    Data data = new Data();
+    LandroidWorxApp.BusinessLogic.Config config = new LandroidWorxApp.BusinessLogic.Config();
+    string nextZone = string.Empty;
+    string batteryStatus = "empty";
+    string bearerToken = string.Empty;
+    string serialNumber = string.Empty;
+    string broker = string.Empty;
+    string cmdInPath = string.Empty;
+    string cmdOutPath = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Setup();
+        await GetData();
+    }
+
+    public async Task Setup()
+    {
+        var response = LsClientWeb.Login(new LsClientWeb_LoginRequest()
+        {
+            ClientSecret = Configuration.GetValue<string>("ClientSecret"),
+            GrantType = "password",
+            Scope = "*",
+            Username = "roberto.gualandris@hotmail.it",
+            Password = "ilguala11"
+        });
+
+        var products = LsClientWeb.GetProducts(new LsClientWeb_GetProductsRequest() { BearerToken = response.BearerToken });
+        bearerToken = response.BearerToken;
+        broker = response.BrokerUrl;
+        serialNumber = products.Products.First().SerialNo;
+        cmdInPath = products.Products.First().Topic.CmdIn;
+        cmdOutPath = products.Products.First().Topic.CmdOut;
+    }
+
+    public async Task GetData()
+    {
+        var status = LsClientWeb.GetProductStatus(new LsClientWeb_GetProductStatusRequest() { BearerToken = bearerToken, SerianNumber = serialNumber });
+        data = status.Status.Dat;
+        config = status.Status.Cfg;
+        if (data.Battery.Perc > 90)
+            batteryStatus = "full";
+        else if (data.Battery.Perc > 60)
+            batteryStatus = "three-quarters";
+        else if (data.Battery.Perc > 40)
+            batteryStatus = "half";
+        else if (data.Battery.Perc > 15)
+            batteryStatus = "quarter";
+        else
+            batteryStatus = "empty";
+
+        nextZone = config.MultiZones[0] > 0 ? (config.MultiZonePercs[data.LastZone] + 1).ToString() : "-";
     }
 }
