@@ -12,6 +12,7 @@ using Hangfire.Annotations;
 using Hangfire.Dashboard;
 using Blazorise;
 using Blazorise.Icons.FontAwesome;
+using Blazorise.Bootstrap;
 
 namespace LandroidWorxApp
 {
@@ -37,6 +38,7 @@ namespace LandroidWorxApp
                  options.ChangeTextOnKeyPress = true; // optional
              });
             services.AddFontAwesomeIcons();
+            services.AddBootstrapProviders();
 
             // Add Hangfire services.
             services.AddHangfire(configuration => configuration
@@ -81,6 +83,7 @@ namespace LandroidWorxApp
             });
             app.UseHangfireDashboard(options: new DashboardOptions() { Authorization = new[] { new HangFireAuthorizationFilter() } });
 
+            app.ApplicationServices.UseBootstrapProviders().UseFontAwesomeIcons();
         }
     }
 
