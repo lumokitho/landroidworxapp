@@ -5,7 +5,9 @@
 @using System.Globalization
 @using uPLibrary.Networking.M2Mqtt;
 @using uPLibrary.Networking.M2Mqtt.Messages;
+@using LandroidWorxApp.Components;
 @inject ILsClientWeb LsClientWeb
+@inject IManager Manager
 @inject IConfiguration Configuration
 @inject IJSRuntime JSRuntime
 
@@ -20,43 +22,14 @@
 </Tabs>
 <TabsContent @ref="days">
     <TabPanel Name="@DayOfWeek.Monday.ToString()" IsActive="selectedTab == DayOfWeek.Monday">
+        @foreach (var item in Plannings.Where(p => p.DayOfWeek == DayOfWeek.Monday))
+        {
+            <TimeSchedule Planning="item" Config=config />
+        }
 
     </TabPanel>
     <TabPanel Name="@DayOfWeek.Tuesday.ToString()" IsActive="selectedTab == DayOfWeek.Tuesday">
-
-        <Row Class="mt-4">
-            <Column ColumnSize="ColumnSize.Is4">
-                <Field>
-                    <FieldLabel>Time Start</FieldLabel>
-                    <TextEdit Class="timepicker" @ref="timeStart" Placeholder="00:00">
-                    </TextEdit>
-                </Field>
-            </Column>
-            <Column ColumnSize="ColumnSize.Is4">
-                <Field>
-                    <FieldLabel>Duration</FieldLabel>
-                    <NumericEdit TValue="int?" />
-                </Field>
-            </Column>
-            @if (config.MultiZones.Count() > 0)
-            {
-                <Column ColumnSize="ColumnSize.Is4">
-                    <Field>
-                        <FieldLabel>Zone</FieldLabel>
-                        <SelectEdit TValue="int">
-                            @foreach (var item in config.MultiZones)
-                            {
-                                if (item > 0)
-                                {
-                                    <SelectItem Value="config.MultiZones.ToList().IndexOf(item)">@config.MultiZones.ToList().IndexOf(item)</SelectItem>
-                                }
-                            }
-                        </SelectEdit>
-                    </Field>
-                </Column>
-            }
-
-        </Row>
+        <TimeSchedule Config=config />
     </TabPanel>
     <TabPanel Name="@DayOfWeek.Wednesday.ToString()" IsActive="selectedTab == DayOfWeek.Wednesday">
         ---
@@ -98,6 +71,7 @@
 
     Data data = new Data();
     LandroidWorxApp.BusinessLogic.Config config = new LandroidWorxApp.BusinessLogic.Config();
+    List<TimePlanning_BL> Plannings = new List<TimePlanning_BL>();
     string nextZone = string.Empty;
     string batteryStatus = "empty";
     string bearerToken = string.Empty;
@@ -110,6 +84,7 @@
     {
         await Setup();
         await GetData();
+        GetTimePannings();
     }
 
     public async Task Setup()
@@ -148,5 +123,11 @@
             batteryStatus = "empty";
 
         nextZone = config.MultiZones[0] > 0 ? (config.MultiZonePercs[data.LastZone] + 1).ToString() : "-";
+    }
+
+    private void GetTimePannings()
+    {
+        var response = Manager.GetTimePlannings(new GetTimePlanningsRequest() { Username = "roberto.gualandris@hotmail.it" });
+        Plannings = response.Plannings;
     }
 }

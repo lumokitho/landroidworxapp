@@ -33,6 +33,7 @@ namespace LandroidWorxApp
             services.AddServerSideBlazor();
             services.AddSingleton<WeatherForecastService>();
             services.AddSingleton<ILsClientWeb>(x => new LsClientWeb(Configuration, "LandroidWorxAppData"));
+            services.AddSingleton<IManager>(x => new Manager(Configuration, "LandroidWorxAppData"));
             services.AddBlazorise(options =>
              {
                  options.ChangeTextOnKeyPress = true; // optional
