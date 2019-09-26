@@ -4,14 +4,14 @@
     <Column ColumnSize="ColumnSize.Is4">
         <Field>
             <FieldLabel>Time Start</FieldLabel>
-            <TextEdit Class="timepicker" Placeholder="00:00" @bind-Text="Planning.TimeStartString">
+            <TextEdit Class="timepicker" Placeholder="00:00" Text="@Planning.TimeStart.ToString(@"hh\:mm")"  TextChanged ="SetTime" >
             </TextEdit>
         </Field>
     </Column>
     <Column ColumnSize="ColumnSize.Is4">
         <Field>
             <FieldLabel>Duration</FieldLabel>
-            <NumericEdit TValue="int"  @bind-Value="Planning.Duration" />
+            <NumericEdit TValue="int" @bind-Value="Planning.Duration"  />
         </Field>
     </Column>
     @if (Config.MultiZones.Count() > 0)
@@ -19,7 +19,7 @@
         <Column ColumnSize="ColumnSize.Is4">
             <Field>
                 <FieldLabel>Zone</FieldLabel>
-                <SelectEdit TValue="int?" @bind-SelectedValue="Planning.Zone">
+                <SelectEdit TValue="int" @bind-SelectedValue="Planning.Zone">
                     @foreach (var item in Config.MultiZones)
                     {
                         if (item > 0)
@@ -35,9 +35,15 @@
 </Row>
 
 @code {
-    [Parameter]
-    public LandroidWorxApp.BusinessLogic.Config Config { get; set; }
 
     [Parameter]
     public TimePlanning_BL Planning { get; set; }
+
+    [Parameter]
+    public LandroidWorxApp.BusinessLogic.Config Config { get; set; }
+
+    private void SetTime(string value)
+    {
+        Planning.TimeStart = TimeSpan.TryParse(value, System.Globalization.CultureInfo.CurrentCulture, out TimeSpan result) ? result : new TimeSpan();
+    }
 }

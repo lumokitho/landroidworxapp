@@ -2,7 +2,6 @@
 @using System.Globalization
 @using LandroidWorxApp.BusinessLogic
 @using Microsoft.Extensions.Configuration
-@using System.Globalization
 @using uPLibrary.Networking.M2Mqtt;
 @using uPLibrary.Networking.M2Mqtt.Messages;
 @using LandroidWorxApp.Components;
@@ -20,33 +19,67 @@
     <Tab Name="@DayOfWeek.Saturday.ToString()" IsActive="selectedTab == DayOfWeek.Saturday">@CultureInfo.CurrentCulture.DateTimeFormat.AbbreviatedDayNames[(int)DayOfWeek.Saturday].ToUpper()</Tab>
     <Tab Name="@DayOfWeek.Sunday.ToString()" IsActive="selectedTab == DayOfWeek.Sunday">@CultureInfo.CurrentCulture.DateTimeFormat.AbbreviatedDayNames[(int)DayOfWeek.Sunday].ToUpper()</Tab>
 </Tabs>
-<TabsContent @ref="days">
-    <TabPanel Name="@DayOfWeek.Monday.ToString()" IsActive="selectedTab == DayOfWeek.Monday">
-        @foreach (var item in Plannings.Where(p => p.DayOfWeek == DayOfWeek.Monday))
-        {
-            <TimeSchedule Planning="item" Config=config />
-        }
+<EditForm Model="Plannings">
+    <TabsContent @ref="days">
 
-    </TabPanel>
-    <TabPanel Name="@DayOfWeek.Tuesday.ToString()" IsActive="selectedTab == DayOfWeek.Tuesday">
-        <TimeSchedule Config=config />
-    </TabPanel>
-    <TabPanel Name="@DayOfWeek.Wednesday.ToString()" IsActive="selectedTab == DayOfWeek.Wednesday">
-        ---
-    </TabPanel>
-    <TabPanel Name="@DayOfWeek.Thursday.ToString()" IsActive="selectedTab == DayOfWeek.Thursday">
-        òòò
-    </TabPanel>
-    <TabPanel Name="@DayOfWeek.Friday.ToString()" IsActive="selectedTab == DayOfWeek.Friday">
-        òòò
-    </TabPanel>
-    <TabPanel Name="@DayOfWeek.Saturday.ToString()" IsActive="selectedTab == DayOfWeek.Saturday">
-        òòò
-    </TabPanel>
-    <TabPanel Name="@DayOfWeek.Sunday.ToString()" IsActive="selectedTab == DayOfWeek.Sunday">
-        òòò
-    </TabPanel>
-</TabsContent>
+        <TabPanel Name="@DayOfWeek.Monday.ToString()" IsActive="selectedTab == DayOfWeek.Monday">
+            @foreach (var item in Plannings.Where(p => p.DayOfWeek == DayOfWeek.Monday).OrderBy(p => p.TimeStart))
+            {
+                var planning = item;
+                <TimeSchedule @key="item.Id" Planning="planning" Config=config />
+            }
+
+        </TabPanel>
+        <TabPanel Name="@DayOfWeek.Tuesday.ToString()" IsActive="selectedTab == DayOfWeek.Tuesday">
+            @foreach (var item in Plannings.Where(p => p.DayOfWeek == DayOfWeek.Tuesday).OrderBy(p => p.TimeStart))
+            {
+                var planning = item;
+                <TimeSchedule @key="item.Id" Planning="planning" Config=config />
+            }
+        </TabPanel>
+        <TabPanel Name="@DayOfWeek.Wednesday.ToString()" IsActive="selectedTab == DayOfWeek.Wednesday">
+            @foreach (var item in Plannings.Where(p => p.DayOfWeek == DayOfWeek.Wednesday).OrderBy(p => p.TimeStart))
+            {
+                var planning = item;
+                <TimeSchedule @key="item.Id" Planning="planning" Config=config />
+            }
+        </TabPanel>
+        <TabPanel Name="@DayOfWeek.Thursday.ToString()" IsActive="selectedTab == DayOfWeek.Thursday">
+            @foreach (var item in Plannings.Where(p => p.DayOfWeek == DayOfWeek.Thursday).OrderBy(p => p.TimeStart))
+            {
+                var planning = item;
+                <TimeSchedule @key="item.Id" Planning="planning" Config=config />
+            }
+        </TabPanel>
+        <TabPanel Name="@DayOfWeek.Friday.ToString()" IsActive="selectedTab == DayOfWeek.Friday">
+            @foreach (var item in Plannings.Where(p => p.DayOfWeek == DayOfWeek.Friday).OrderBy(p => p.TimeStart))
+            {
+                var planning = item;
+                <TimeSchedule @key="item.Id" Planning="planning" Config=config />
+            }
+        </TabPanel>
+        <TabPanel Name="@DayOfWeek.Saturday.ToString()" IsActive="selectedTab == DayOfWeek.Saturday">
+            @foreach (var item in Plannings.Where(p => p.DayOfWeek == DayOfWeek.Saturday).OrderBy(p => p.TimeStart))
+            {
+                var planning = item;
+                <TimeSchedule @key="item.Id" Planning="planning" Config=config />
+            }
+        </TabPanel>
+        <TabPanel Name="@DayOfWeek.Sunday.ToString()" IsActive="selectedTab == DayOfWeek.Sunday">
+            @foreach (var item in Plannings.Where(p => p.DayOfWeek == DayOfWeek.Sunday).OrderBy(p => p.TimeStart))
+            {
+                var planning = item;
+                <TimeSchedule @key="item.Id" Planning="planning" Config=config />
+            }
+        </TabPanel>
+
+    </TabsContent>
+
+    <div class="text-right mt-3">
+        <Button Color="Color.Primary" Clicked="@OnButtonClicked">Save Scheduler</Button>
+    </div>
+
+</EditForm>
 
 
 @code
@@ -72,6 +105,7 @@
     Data data = new Data();
     LandroidWorxApp.BusinessLogic.Config config = new LandroidWorxApp.BusinessLogic.Config();
     List<TimePlanning_BL> Plannings = new List<TimePlanning_BL>();
+    TimeSchedule test;
     string nextZone = string.Empty;
     string batteryStatus = "empty";
     string bearerToken = string.Empty;
@@ -83,8 +117,9 @@
     protected override async Task OnInitializedAsync()
     {
         await Setup();
+        await GetTimePannings();
         await GetData();
-        GetTimePannings();
+
     }
 
     public async Task Setup()
@@ -125,9 +160,15 @@
         nextZone = config.MultiZones[0] > 0 ? (config.MultiZonePercs[data.LastZone] + 1).ToString() : "-";
     }
 
-    private void GetTimePannings()
+    public async Task GetTimePannings()
     {
         var response = Manager.GetTimePlannings(new GetTimePlanningsRequest() { Username = "roberto.gualandris@hotmail.it" });
         Plannings = response.Plannings;
+    }
+
+
+    public void OnButtonClicked()
+    {
+
     }
 }
