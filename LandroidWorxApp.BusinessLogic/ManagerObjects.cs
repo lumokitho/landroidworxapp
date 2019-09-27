@@ -9,8 +9,6 @@ namespace LandroidWorxApp.BusinessLogic
         public int Id { get; set; }
         public string Username { get; set; }
         public DayOfWeek DayOfWeek { get; set; }
-        
-        private TimeSpan _timeStart;
         public TimeSpan TimeStart { get; set; }
         public string TimeStartString { get; set; }
         public int Duration { get; set; }

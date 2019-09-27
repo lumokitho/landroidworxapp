@@ -19,7 +19,7 @@
     <Tab Name="@DayOfWeek.Saturday.ToString()" IsActive="selectedTab == DayOfWeek.Saturday">@CultureInfo.CurrentCulture.DateTimeFormat.AbbreviatedDayNames[(int)DayOfWeek.Saturday].ToUpper()</Tab>
     <Tab Name="@DayOfWeek.Sunday.ToString()" IsActive="selectedTab == DayOfWeek.Sunday">@CultureInfo.CurrentCulture.DateTimeFormat.AbbreviatedDayNames[(int)DayOfWeek.Sunday].ToUpper()</Tab>
 </Tabs>
-<EditForm Model="Plannings">
+<EditForm Model="Plannings" OnValidSubmit="@HandleValidSubmit">
     <TabsContent @ref="days">
 
         <TabPanel Name="@DayOfWeek.Monday.ToString()" IsActive="selectedTab == DayOfWeek.Monday">
@@ -75,9 +75,14 @@
 
     </TabsContent>
 
-    <div class="text-right mt-3">
-        <Button Color="Color.Primary" Clicked="@OnButtonClicked">Save Scheduler</Button>
-    </div>
+    <Row>
+        <Column ColumnSize="ColumnSize.Is6">
+            <Button Color="Color.Info" Clicked="@AddTimeSchedule">Add Time</Button>
+        </Column>
+        <Column ColumnSize="ColumnSize.Is6" Class="text-right">
+            <Button Color="Color.Primary" Type="ButtonType.Submit" Clicked="@OnButtonClicked">Save Scheduler</Button>
+        </Column>
+    </Row>
 
 </EditForm>
 
@@ -166,9 +171,20 @@
         Plannings = response.Plannings;
     }
 
+    private void HandleValidSubmit()
+    {
+        Console.WriteLine("OnValidSubmit");
+    }
 
     public void OnButtonClicked()
     {
 
     }
+
+    public void AddTimeSchedule()
+    {
+        Plannings.Add(new TimePlanning_BL() { DayOfWeek = selectedTab, Username = "roberto.gualandris@hotmail.it", });
+    }
+    
+
 }
