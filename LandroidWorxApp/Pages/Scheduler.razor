@@ -87,11 +87,30 @@
 </EditForm>
 
 
+<Modal @ref="validationModal">
+    <ModalBackdrop />
+    <ModalContent IsCentered="true" >
+        <ModalHeader>
+            <ModalTitle>Attention</ModalTitle>
+            <CloseButton Clicked="() => validationModal.Hide()" />
+        </ModalHeader>
+        <ModalBody>
+            @modalText;
+        </ModalBody>
+        <ModalFooter>
+            <Button Color="Color.Secondary" Clicked="() => validationModal.Hide()">Close</Button>
+        </ModalFooter>
+    </ModalContent>
+</Modal>
+
+
 @code
 {
     TextEdit timeStart;
     DayOfWeek selectedTab = DateTime.Now.DayOfWeek;
     TabsContent days;
+    Modal validationModal;
+    string modalText;
 
     private void OnSelectedTab(string tab)
     {
@@ -178,13 +197,17 @@
 
     public void OnButtonClicked()
     {
-
+        if(Plannings.Any(p => p.Duration <= 0))
+        {
+            modalText = "Duration can not be equal or less then 0";
+            validationModal.Show();
+        }
     }
 
     public void AddTimeSchedule()
     {
         Plannings.Add(new TimePlanning_BL() { DayOfWeek = selectedTab, Username = "roberto.gualandris@hotmail.it", });
     }
-    
+
 
 }

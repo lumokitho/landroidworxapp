@@ -165,3 +165,7 @@ span.info {
 .nav-link {
     cursor: pointer;
 }
+
+.modal {
+    z-index: 999999;
+}
