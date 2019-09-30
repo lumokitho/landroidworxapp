@@ -57,13 +57,13 @@ namespace LandroidWorxApp
                 }));
 
             // Add the processing server as IHostedService
-            //services.AddHangfireServer();
+            services.AddHangfireServer();
 
             services.AddServerSideBlazor().AddCircuitOptions(options => { options.DetailedErrors = true; });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IBackgroundJobClient backgroundJobs, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
             {
@@ -85,6 +85,7 @@ namespace LandroidWorxApp
                 endpoints.MapFallbackToPage("/_Host");
             });
             app.UseHangfireDashboard(options: new DashboardOptions() { Authorization = new[] { new HangFireAuthorizationFilter() } });
+            backgroundJobs.Enqueue(() => Console.WriteLine("Hello world from Hangfire!"));
 
             app.ApplicationServices.UseBootstrapProviders().UseFontAwesomeIcons();
         }

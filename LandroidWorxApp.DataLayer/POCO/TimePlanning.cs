@@ -15,5 +15,6 @@ namespace LandroidWorxApp.DataLayer.POCO
         public TimeSpan TimeStart { get; set; }
         public int Duration { get; set; }
         public int? Zone { get; set; }
+        public bool CutEdge { get; set; }
     }
 }

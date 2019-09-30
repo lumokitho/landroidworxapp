@@ -13,5 +13,6 @@ namespace LandroidWorxApp.BusinessLogic
         public string TimeStartString { get; set; }
         public int Duration { get; set; }
         public int Zone { get; set; }
+        public bool CutEdge { get; set; }
     }
 }

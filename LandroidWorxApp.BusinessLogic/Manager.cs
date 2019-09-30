@@ -25,5 +25,14 @@ namespace LandroidWorxApp.BusinessLogic
             var plannings = _repoManager.GenericOperations.GetByExpression<TimePlanning>(t => t.Username == request.Username);
             return new GetTimePlanningsResponse() { Plannings = plannings.ConvertAll(c => c.Adapt<TimePlanning_BL>()) };
         }
+
+        public SaveTimePlanningsResponse SaveTimePlanningsRequest(SaveTimePlanningsRequest request)
+        {
+            var response = _repoManager.GenericOperations.SaveAll(request.Plannings.ConvertAll(c => c.Adapt<TimePlanning>()));
+            return new SaveTimePlanningsResponse()
+            {
+                PlanningsUpdated = response.ConvertAll(c => c.Adapt<TimePlanning_BL>())
+            };
+        }
     }
 }

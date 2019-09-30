@@ -10,7 +10,9 @@
     <PackageReference Include="BlazorEmbedLibrary" Version="1.0.0" />
     <PackageReference Include="Blazorise.Bootstrap" Version="0.8.4" />
     <PackageReference Include="Blazorise.Icons.FontAwesome" Version="0.8.4" />
+    <PackageReference Include="Hangfire.AspNetCore" Version="1.7.6" />
     <PackageReference Include="HangFire.Core" Version="1.7.6" />
+    <PackageReference Include="HangFire.SqlServer" Version="1.7.6" />
     <PackageReference Include="Microsoft.AspNetCore.Blazor.HttpClient" Version="3.0.0-preview9.19424.4" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="3.0.0-preview9.19423.6" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="3.0.0-preview9.19423.6">

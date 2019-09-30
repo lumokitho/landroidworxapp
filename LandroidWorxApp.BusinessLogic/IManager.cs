@@ -8,5 +8,6 @@ namespace LandroidWorxApp.BusinessLogic
     public interface IManager
     {
         GetTimePlanningsResponse GetTimePlannings(GetTimePlanningsRequest request);
+        SaveTimePlanningsResponse SaveTimePlanningsRequest(SaveTimePlanningsRequest request);
     }
 }

@@ -9,6 +9,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LandroidWorxApp.BusinessLog
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LandroidWorxApp.DataLayer", "LandroidWorxApp.DataLayer\LandroidWorxApp.DataLayer.csproj", "{FD76BF92-40B7-48B5-8622-908DEA0E74D4}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LandroidWorxApp.HangfireDashboard", "LandroidWorxApp.HangfireDasboard\LandroidWorxApp.HangfireDashboard.csproj", "{C18D671E-86AB-4653-838F-CA265A2E4748}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{FD76BF92-40B7-48B5-8622-908DEA0E74D4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FD76BF92-40B7-48B5-8622-908DEA0E74D4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FD76BF92-40B7-48B5-8622-908DEA0E74D4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C18D671E-86AB-4653-838F-CA265A2E4748}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C18D671E-86AB-4653-838F-CA265A2E4748}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C18D671E-86AB-4653-838F-CA265A2E4748}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C18D671E-86AB-4653-838F-CA265A2E4748}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
