@@ -15,6 +15,7 @@ namespace LandroidWorxApp.BusinessLogic
 
     public class SaveTimePlanningsRequest
     {
+        public string Username { get; set; }
         public List<TimePlanning_BL> Plannings { get; set; }
     }
     public class SaveTimePlanningsResponse

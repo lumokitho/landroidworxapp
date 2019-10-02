@@ -8,8 +8,8 @@ namespace LandroidWorxApp.DataLayer.POCO
     [SugarTable("TimePlannings")]
     public class TimePlanning
     {
-        [SugarColumn(IsPrimaryKey = true, IsIdentity = true)]
-        public int Id { get; set; }
+        [SugarColumn(IsPrimaryKey = true)]
+        public Guid Id { get; set; }
         public string Username { get; set; }
         public DayOfWeek DayOfWeek { get; set; }
         public TimeSpan TimeStart { get; set; }
