@@ -10,6 +10,7 @@ namespace LandroidWorxApp.DataLayer.POCO
     {
         [SugarColumn(IsPrimaryKey = true)]
         public string Username { get; set; }
+        public string Broker { get; set; }
         public string X509Certificate2 { get; set; }
     }
 }

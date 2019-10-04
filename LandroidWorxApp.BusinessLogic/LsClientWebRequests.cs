@@ -29,6 +29,7 @@ namespace LandroidWorxApp.BusinessLogic
 
     public class LsClientWeb_GetProductsRequest : LsClientWeb_Base
     {
+        public string Username { get; set; }
     }
     public class LsClientWeb_GetProductsResponse
     {

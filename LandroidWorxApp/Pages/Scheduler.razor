@@ -154,7 +154,7 @@
             Password = "ilguala11"
         });
 
-        var products = LsClientWeb.GetProducts(new LsClientWeb_GetProductsRequest() { BearerToken = response.BearerToken });
+        var products = LsClientWeb.GetProducts(new LsClientWeb_GetProductsRequest() { BearerToken = response.BearerToken, Username ="roberto.gualandris@hotmail.it" });
         bearerToken = response.BearerToken;
         broker = response.BrokerUrl;
         serialNumber = products.Products.First().SerialNo;
@@ -200,7 +200,12 @@
             validationModal.Show();
             return;
         }
-        Manager.SaveTimePlanningsRequest(new SaveTimePlanningsRequest() { Plannings = Plannings });
+        Manager.SaveTimePlanningsRequest(new SaveTimePlanningsRequest() { Plannings = Plannings, SerialNumber = serialNumber });
+        Manager.Test(new SendTimePlanCommandRequest()
+        {
+            SerialNumber = serialNumber,
+            Planning = Plannings.First()
+        });
     }
 
     public void AddTimeSchedule()

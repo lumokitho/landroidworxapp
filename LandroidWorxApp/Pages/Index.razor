@@ -132,7 +132,7 @@
             Password = "ilguala11"
         });
 
-        var products = LsClientWeb.GetProducts(new LsClientWeb_GetProductsRequest() { BearerToken = response.BearerToken });
+        var products = LsClientWeb.GetProducts(new LsClientWeb_GetProductsRequest() { BearerToken = response.BearerToken, Username = "roberto.gualandris@hotmail.it"  });
         bearerToken = response.BearerToken;
         broker = response.BrokerUrl;
         serialNumber = products.Products.First().SerialNo;

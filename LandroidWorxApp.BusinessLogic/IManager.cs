@@ -9,6 +9,6 @@ namespace LandroidWorxApp.BusinessLogic
     {
         GetTimePlanningsResponse GetTimePlannings(GetTimePlanningsRequest request);
         SaveTimePlanningsResponse SaveTimePlanningsRequest(SaveTimePlanningsRequest request);
-        void Test();
+        void Test(SendTimePlanCommandRequest time);
     }
 }

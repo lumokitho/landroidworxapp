@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Runtime.Serialization.Json;
 using System.Security.Cryptography.X509Certificates;
@@ -60,7 +61,7 @@ namespace LandroidWorxApp.BusinessLogic
             response.CertWX = GetMqttCertificate(response.BearerToken);
 
             // Save Userdata on DB
-            _repoManager.GenericOperations.Save(new UserData() { Username = request.Username, X509Certificate2 = Convert.ToBase64String(response.CertWX.Export(X509ContentType.Cert))});
+            _repoManager.GenericOperations.Save(new UserData() { Username = request.Username, X509Certificate2 = Convert.ToBase64String(response.CertWX.Export(X509ContentType.Pkcs12)), Broker = response.BrokerUrl});
 
             return response;
         }
@@ -79,6 +80,17 @@ namespace LandroidWorxApp.BusinessLogic
                 DataContractJsonSerializer dcjs = new DataContractJsonSerializer(typeof(List<LsProductItem>));
                 response.Products = (List<LsProductItem>)dcjs.ReadObject(ms);
             }
+
+            // Save Userdata on DB
+            _repoManager.GenericOperations.SaveAll(response.Products.Select(p => new UserProduct() { 
+                Username = request.Username,
+                SerialNumber = p.SerialNo,
+                Name = p.Name,
+                MacAddress = p.MacAdr,
+                CmdInPath = p.Topic.CmdIn,
+                CmdOutPath = p.Topic.CmdOut
+            }).ToList());
+
             return response;
         }
 
