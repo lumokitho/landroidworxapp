@@ -43,14 +43,14 @@ namespace LandroidWorxApp.BusinessLogic
             
             var newPlannings = _repoManager.GenericOperations.SaveAll(request.Plannings.ConvertAll(c => c.Adapt<TimePlanning>()));
 
-            //newPlannings.ForEach(p => { p.TimeStart = p.TimeStart.Subtract(TimeSpan.FromMinutes(5)); RecurringJob.AddOrUpdate<IManager>(p.Id.ToString(), (m) => m.Test(new SendTimePlanCommandRequest() { SerialNumber = request.SerialNumber, Planning = p.Adapt<TimePlanning_BL>() }), Cron.Weekly(p.DayOfWeek, p.TimeStart.Hours, p.TimeStart.Minutes ), TimeZoneInfo.FindSystemTimeZoneById("W. Europe Standard Time")); });
+            newPlannings.ForEach(p => { var timestart = p.TimeStart.Subtract(TimeSpan.FromMinutes(5)); RecurringJob.AddOrUpdate<IManager>(p.Id.ToString(), (m) => m.SetTimeCommand(new SendTimePlanCommandRequest() { SerialNumber = request.SerialNumber, Planning = p.Adapt<TimePlanning_BL>() }), Cron.Weekly(p.DayOfWeek, timestart.Hours, timestart.Minutes ), TimeZoneInfo.FindSystemTimeZoneById("W. Europe Standard Time")); });
             return new SaveTimePlanningsResponse()
             {
                 PlanningsUpdated = newPlannings.ConvertAll(c => c.Adapt<TimePlanning_BL>())
             };
         }
 
-        public void Test(SendTimePlanCommandRequest command)
+        public void SetTimeCommand(SendTimePlanCommandRequest command)
         {
             UserData user = _repoManager.GenericOperations.GetSingleByExpression<UserData>(u => u.Username == command.Planning.Username);
             UserProduct product = _repoManager.GenericOperations.GetSingleByExpression<UserProduct>(p => p.SerialNumber == command.SerialNumber);

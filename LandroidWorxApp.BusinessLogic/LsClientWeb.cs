@@ -58,10 +58,10 @@ namespace LandroidWorxApp.BusinessLogic
             }
 
             response.BrokerUrl = GetBrokerEndpoint(response.BearerToken);
-            response.CertWX = GetMqttCertificate(response.BearerToken);
+            response.CertWX = GetMqttCertificate(response.BearerToken, out string certString);
 
             // Save Userdata on DB
-            _repoManager.GenericOperations.Save(new UserData() { Username = request.Username, X509Certificate2 = Convert.ToBase64String(response.CertWX.Export(X509ContentType.Pkcs12)), Broker = response.BrokerUrl});
+            _repoManager.GenericOperations.Save(new UserData() { Username = request.Username, X509Certificate2 = certString, Broker = response.BrokerUrl});
 
             return response;
         }
@@ -115,7 +115,7 @@ namespace LandroidWorxApp.BusinessLogic
         public LsClientWeb_PublishCommandResponse PublishCommand (LsClientWeb_PublishCommandRequest request)
         {
             if(request.CertWX == null && !string.IsNullOrEmpty(request.BearerToken))
-                request.CertWX = GetMqttCertificate(request.BearerToken);
+                request.CertWX = GetMqttCertificate(request.BearerToken, out string certString);
 
             MqttClient mqtt = new MqttClient(request.Broker, 8883, true, null, request.CertWX, MqttSslProtocols.TLSv1_2);
 
@@ -150,8 +150,9 @@ namespace LandroidWorxApp.BusinessLogic
             return broker;
         }
 
-        private X509Certificate2 GetMqttCertificate(string token)
+        private X509Certificate2 GetMqttCertificate(string token, out string certString)
         {
+            certString = null;
             var client = new WebClient();
             client.Headers["Authorization"] = token;
             var buf = client.DownloadData(_configuration.GetValue<string>("WorxApi") + "users/certificate");
@@ -166,7 +167,7 @@ namespace LandroidWorxApp.BusinessLogic
 
                 if (!string.IsNullOrEmpty(lsc.Pkcs12))
                 {
-                    str = lsc.Pkcs12.Replace("\\/", "/");
+                    certString = str = lsc.Pkcs12.Replace("\\/", "/");
                     buf = Convert.FromBase64String(str);
                     return new X509Certificate2(buf);
                 }

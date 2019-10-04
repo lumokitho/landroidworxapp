@@ -201,11 +201,6 @@
             return;
         }
         Manager.SaveTimePlanningsRequest(new SaveTimePlanningsRequest() { Plannings = Plannings, SerialNumber = serialNumber });
-        Manager.Test(new SendTimePlanCommandRequest()
-        {
-            SerialNumber = serialNumber,
-            Planning = Plannings.First()
-        });
     }
 
     public void AddTimeSchedule()
