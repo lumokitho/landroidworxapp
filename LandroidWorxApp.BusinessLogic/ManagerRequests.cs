@@ -27,5 +27,7 @@ namespace LandroidWorxApp.BusinessLogic
     {
         public TimePlanning_BL Planning { get; set; }
         public string SerialNumber { get; set; }
+        public string FunctionUrl { get; set; }
+        public string FunctionKey { get; set; }
     }
 }

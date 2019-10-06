@@ -3,10 +3,13 @@ using LandroidWorxApp.DataLayer;
 using LandroidWorxApp.DataLayer.POCO;
 using Mapster;
 using Microsoft.Extensions.Configuration;
+using Newtonsoft.Json;
 using Quartz;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
+using System.Net.Http;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using uPLibrary.Networking.M2Mqtt;
@@ -39,7 +42,7 @@ namespace LandroidWorxApp.BusinessLogic
             // Get old time plannings of user and remove all with recurring jobs 
             var oldPlannings = _repoManager.GenericOperations.GetByExpression<TimePlanning>(p => p.Username == request.Plannings.First().Username);
             oldPlannings.ForEach(p => { RecurringJob.RemoveIfExists(p.Id.ToString()); });
-            _repoManager.GenericOperations.DeleteAll(oldPlannings);
+            oldPlannings.ForEach(p => { _repoManager.GenericOperations.DeleteByExpression<TimePlanning>(x => x.Id == p.Id); });
             
             var newPlannings = _repoManager.GenericOperations.SaveAll(request.Plannings.ConvertAll(c => c.Adapt<TimePlanning>()));
 
@@ -66,32 +69,49 @@ namespace LandroidWorxApp.BusinessLogic
                 command.Planning.DayOfWeek == DayOfWeek.Friday ? string.Format("\"{0}:{1}\",{2},{3}", command.Planning.TimeStart.Hours, command.Planning.TimeStart.Minutes, command.Planning.Duration, command.Planning.CutEdge ? 1 : 0) : "\"00:00\",0,0",
                 command.Planning.DayOfWeek == DayOfWeek.Saturday ? string.Format("\"{0}:{1}\",{2},{3}", command.Planning.TimeStart.Hours, command.Planning.TimeStart.Minutes, command.Planning.Duration, command.Planning.CutEdge ? 1 : 0) : "\"00:00\",0,0"
                 );
-            _lsClientWeb.PublishCommand(new LsClientWeb_PublishCommandRequest()
+
+            var planCommandRequest = new
             {
-                CertWX = certificate,
+                CertWX = user.X509Certificate2,
                 Content = planCommand,
                 CmdInPath = product.CmdInPath,
                 CmdOutPath = product.CmdOutPath,
                 Broker = user.Broker,
                 Uuid = Guid.NewGuid().ToString(),
-                Handler = (object sender, MqttMsgPublishedEventArgs e) =>
-                {
-                    ((MqttClient)sender).Disconnect();
-                }
-            });
-            _lsClientWeb.PublishCommand(new LsClientWeb_PublishCommandRequest()
+            };
+
+            var zoneCommandRequest = new 
             {
-                CertWX = certificate,
+                CertWX = user.X509Certificate2,
                 Content = zoneCommand,
                 CmdInPath = product.CmdInPath,
                 CmdOutPath = product.CmdOutPath,
                 Broker = user.Broker,
                 Uuid = Guid.NewGuid().ToString(),
-                Handler = (object sender, MqttMsgPublishedEventArgs e) =>
+            };
+
+            // Chiamo il servito di html to pdf per creare il manifest dato l'url web del manifest stesso
+            using (HttpClient client = new HttpClient())
+            {
+                var httpRequestMessage = new HttpRequestMessage
                 {
-                    ((MqttClient)sender).Disconnect();
-                }
-            });
+                    Method = HttpMethod.Post,
+                    RequestUri = new Uri(command.FunctionUrl),
+                    Headers = {
+                            { HttpRequestHeader.Accept.ToString(), "application/json" },
+                            { "x-functions-key", command.FunctionKey}
+                        },
+                    Content = new StringContent(JsonConvert.SerializeObject(planCommandRequest))
+                };
+
+                // Set Tls 1.2
+                ServicePointManager.SecurityProtocol = SecurityProtocolType.Ssl3 | SecurityProtocolType.Tls | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12;
+
+                var HtmlToPdfResponse = client.SendAsync(httpRequestMessage).GetAwaiter().GetResult();
+                var messageId = HtmlToPdfResponse.Content.ReadAsByteArrayAsync().GetAwaiter().GetResult();
+            }
+
         }
+
     }
 }
