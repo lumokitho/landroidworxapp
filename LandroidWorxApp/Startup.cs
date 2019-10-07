@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using LandroidWorxApp.Data;
 using LandroidWorxApp.BusinessLogic;
 using Hangfire;
 using Hangfire.SqlServer;
@@ -31,7 +30,6 @@ namespace LandroidWorxApp
         {
             services.AddRazorPages();
             services.AddServerSideBlazor();
-            services.AddSingleton<WeatherForecastService>();
             services.AddSingleton<ILsClientWeb>(x => new LsClientWeb(Configuration, "LandroidWorxAppData"));
             services.AddSingleton<IManager>(x => new Manager(Configuration, "LandroidWorxAppData"));
             services.AddBlazorise(options =>
@@ -76,6 +74,8 @@ namespace LandroidWorxApp
                 app.UseHsts();
             }
 
+            app.UseHangfireDashboard("/hangfire", new DashboardOptions() { Authorization = new[] { new HangFireAuthorizationFilter() } });
+
             app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseRouting();
@@ -83,8 +83,9 @@ namespace LandroidWorxApp
             {
                 endpoints.MapBlazorHub();
                 endpoints.MapFallbackToPage("/_Host");
+                endpoints.MapDefaultControllerRoute();
             });
-            app.UseHangfireDashboard(options: new DashboardOptions() { Authorization = new[] { new HangFireAuthorizationFilter() } });
+
 
             app.ApplicationServices.UseBootstrapProviders().UseFontAwesomeIcons();
         }
