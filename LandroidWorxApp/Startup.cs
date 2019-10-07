@@ -12,6 +12,11 @@ using Hangfire.Dashboard;
 using Blazorise;
 using Blazorise.Icons.FontAwesome;
 using Blazorise.Bootstrap;
+using Microsoft.AspNetCore.Components.Authorization;
+using LandroidWorxApp.AuthProvider;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using System.Net.Http;
 
 namespace LandroidWorxApp
 {
@@ -58,6 +63,18 @@ namespace LandroidWorxApp
             services.AddHangfireServer();
 
             services.AddServerSideBlazor().AddCircuitOptions(options => { options.DetailedErrors = true; });
+
+            // Add auth provider service
+            services.Configure<CookiePolicyOptions>(options =>
+            {
+                options.CheckConsentNeeded = context => true;
+                options.MinimumSameSitePolicy = SameSiteMode.Lax;
+            });
+            services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie();
+            services.AddHttpContextAccessor();
+            services.AddScoped<HttpContextAccessor>();
+            services.AddHttpClient();
+            services.AddScoped<HttpClient>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -78,6 +95,8 @@ namespace LandroidWorxApp
 
             app.UseHttpsRedirection();
             app.UseStaticFiles();
+            app.UseCookiePolicy();
+            app.UseAuthentication();
             app.UseRouting();
             app.UseEndpoints(endpoints =>
             {
