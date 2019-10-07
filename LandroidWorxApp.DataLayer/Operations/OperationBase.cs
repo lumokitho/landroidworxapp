@@ -90,7 +90,7 @@ namespace LandroidWorxApp.DataLayer.Operations
 
                 using (var db = GetDBInstance(connString))
                 {
-                    db.Updateable<T>(element);
+                    db.Updateable<T>(element).ExecuteCommand();
                 }
             }
             catch (Exception ex)
@@ -107,7 +107,7 @@ namespace LandroidWorxApp.DataLayer.Operations
 
                 using (var db = GetDBInstance(connString))
                 {
-                    db.Updateable<T>().SetColumns(updateFields).Where(where);
+                    db.Updateable<T>().SetColumns(updateFields).Where(where).ExecuteCommand();
                 }
             }
             catch (Exception ex)
@@ -124,7 +124,7 @@ namespace LandroidWorxApp.DataLayer.Operations
 
                 using (var db = GetDBInstance(connString))
                 {
-                    db.Updateable(updateFields).Where(where).IgnoreColumns(ignoreAllNullColumns: true);
+                    db.Updateable(updateFields).Where(where).IgnoreColumns(ignoreAllNullColumns: true).ExecuteCommand();
                 }
             }
             catch (Exception ex)
@@ -209,7 +209,7 @@ namespace LandroidWorxApp.DataLayer.Operations
 
                 using (var db = GetDBInstance(connString))
                 {
-                    db.Deleteable<T>().Where(predicate);
+                    db.Deleteable<T>().Where(predicate).ExecuteCommand();
                 }
             }
             catch (Exception ex)
@@ -226,7 +226,7 @@ namespace LandroidWorxApp.DataLayer.Operations
 
                 using (var db = GetDBInstance(connString))
                 {
-                    db.Deleteable<T>(element);
+                    db.Deleteable<T>(element).ExecuteCommand();
                 }
             }
             catch (Exception ex)
@@ -243,7 +243,7 @@ namespace LandroidWorxApp.DataLayer.Operations
 
                 using (var db = GetDBInstance(connString))
                 {
-                    db.Deleteable<T>(elements);
+                    db.Deleteable<T>(elements).ExecuteCommand();
                 }
             }
             catch (Exception ex)

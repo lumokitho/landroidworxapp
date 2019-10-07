@@ -55,7 +55,8 @@ namespace LandroidWorxApp.BusinessLogic
             UserData user = _repoManager.GenericOperations.GetSingleByExpression<UserData>(u => u.Username == command.Planning.Username);
             UserProduct product = _repoManager.GenericOperations.GetSingleByExpression<UserProduct>(p => p.SerialNumber == command.SerialNumber);
 
-            X509Certificate2 certificate = new X509Certificate2(Convert.FromBase64String(user.X509Certificate2));
+            X509Certificate2 certificate = new X509Certificate2(Convert.FromBase64String(user.X509Certificate2), (string)null, X509KeyStorageFlags.MachineKeySet | X509KeyStorageFlags.PersistKeySet | X509KeyStorageFlags.Exportable);
+
             var zoneCommand = "{\"mzv\":[{0},{0},{0},{0},{0},{0},{0},{0},{0},{0}]}".Replace("{0}", command.Planning.Zone.ToString());
             var planCommand = string.Format("{{\"sc\":{{\"d\":[[{0}],[{1}],[{2}],[{3}],[{4}],[{5}],[{6}]],\"m\":1,\"p\":-100}}}}", 
                 command.Planning.DayOfWeek == DayOfWeek.Sunday ? string.Format("\"{0}:{1}\",{2},{3}", command.Planning.TimeStart.Hours, command.Planning.TimeStart.Minutes, command.Planning.Duration, command.Planning.CutEdge ? 1 : 0) : "\"00:00\",0,0",
@@ -66,6 +67,7 @@ namespace LandroidWorxApp.BusinessLogic
                 command.Planning.DayOfWeek == DayOfWeek.Friday ? string.Format("\"{0}:{1}\",{2},{3}", command.Planning.TimeStart.Hours, command.Planning.TimeStart.Minutes, command.Planning.Duration, command.Planning.CutEdge ? 1 : 0) : "\"00:00\",0,0",
                 command.Planning.DayOfWeek == DayOfWeek.Saturday ? string.Format("\"{0}:{1}\",{2},{3}", command.Planning.TimeStart.Hours, command.Planning.TimeStart.Minutes, command.Planning.Duration, command.Planning.CutEdge ? 1 : 0) : "\"00:00\",0,0"
                 );
+
             _lsClientWeb.PublishCommand(new LsClientWeb_PublishCommandRequest()
             {
                 CertWX = certificate,

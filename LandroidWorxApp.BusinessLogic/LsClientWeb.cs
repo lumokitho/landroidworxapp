@@ -169,7 +169,7 @@ namespace LandroidWorxApp.BusinessLogic
                 {
                     certString = str = lsc.Pkcs12.Replace("\\/", "/");
                     buf = Convert.FromBase64String(str);
-                    return new X509Certificate2(buf);
+                    return new X509Certificate2(buf, (string) null, X509KeyStorageFlags.MachineKeySet | X509KeyStorageFlags.PersistKeySet | X509KeyStorageFlags.Exportable);
                 }
             }
 
