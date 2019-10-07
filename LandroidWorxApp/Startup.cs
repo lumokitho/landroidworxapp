@@ -70,7 +70,12 @@ namespace LandroidWorxApp
                 options.CheckConsentNeeded = context => true;
                 options.MinimumSameSitePolicy = SameSiteMode.Lax;
             });
-            services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie();
+            services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie(options =>
+            {
+                options.LoginPath = new PathString("/Login");
+                options.ExpireTimeSpan = TimeSpan.FromDays(1);
+                options.SlidingExpiration = true;
+            });
             services.AddHttpContextAccessor();
             services.AddScoped<HttpContextAccessor>();
             services.AddHttpClient();
@@ -92,7 +97,6 @@ namespace LandroidWorxApp
             }
 
             app.UseHangfireDashboard("/hangfire", new DashboardOptions() { Authorization = new[] { new HangFireAuthorizationFilter() } });
-
             app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseCookiePolicy();
@@ -107,6 +111,8 @@ namespace LandroidWorxApp
 
 
             app.ApplicationServices.UseBootstrapProviders().UseFontAwesomeIcons();
+
+
         }
     }
 

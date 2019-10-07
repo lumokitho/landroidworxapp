@@ -8,7 +8,15 @@
 
 <div class="main">
     <div class="top-row px-4">
-        <a href="https://docs.microsoft.com/en-us/aspnet/" target="_blank">About</a>
+        <AuthorizeView>
+            <Authorized>
+                Hello, @context.User.Identity.Name! @context.User.Claims.First(c => c.Type == "BrokerUrl")
+                <a href="LogOut">Log out</a>
+            </Authorized>
+            <NotAuthorized>
+                <a class="btn btn-info" href="Login">Log in</a>
+            </NotAuthorized>
+        </AuthorizeView>
     </div>
 
     <div class="content px-4">

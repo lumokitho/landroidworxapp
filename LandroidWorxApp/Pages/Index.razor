@@ -1,4 +1,5 @@
 ﻿@page "/"
+@attribute [Authorize]
 @using LandroidWorxApp.BusinessLogic
 @using Microsoft.Extensions.Configuration
 @using System.Globalization
@@ -115,7 +116,7 @@
     string cmdInPath = string.Empty;
     string cmdOutPath = string.Empty;
 
-    protected override async Task OnInitializedAsync ()
+    protected override async Task OnInitializedAsync()
     {
         await Setup();
         await GetData();
@@ -132,7 +133,7 @@
             Password = "ilguala11"
         });
 
-        var products = LsClientWeb.GetProducts(new LsClientWeb_GetProductsRequest() { BearerToken = response.BearerToken, Username = "roberto.gualandris@hotmail.it"  });
+        var products = LsClientWeb.GetProducts(new LsClientWeb_GetProductsRequest() { BearerToken = response.BearerToken, Username = "roberto.gualandris@hotmail.it" });
         bearerToken = response.BearerToken;
         broker = response.BrokerUrl;
         serialNumber = products.Products.First().SerialNo;

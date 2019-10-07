@@ -1,4 +1,5 @@
 ﻿@page "/Login"
+@page "/Login/{ReturnUrl}"
 @using LandroidWorxApp.BusinessLogic
 @using Microsoft.Extensions.Configuration
 @using System.Security.Claims
@@ -14,6 +15,9 @@
 @using Microsoft.AspNetCore.Mvc.RazorPages;
 @inject ILsClientWeb LsClientWeb
 @inject IConfiguration Configuration
+@inject IHttpContextAccessor HostedContext
+@inject NavigationManager NavigationManager
+@inject HttpClient Http
 
 <Row Class="justify-content-center">
     <Column ColumnSize="ColumnSize.IsAuto">
@@ -30,13 +34,25 @@
         <Field>
             <CheckEdit @bind-Checked="RememberMe">Remember me</CheckEdit>
         </Field>
-        <a class="btn btn-info" href="/loginLogic?paramUsername=@Username&paramPassword=@Password&paramRememberMe=@RememberMe">Login</a>
+
+        @*<Button Color="Color.Info" Clicked="LoginUser">Login</Button>*@
+        <a class="btn btn-info" href="/loginAction?username=@Username&password=@Password&rememberme=@RememberMe&returnUrl=@ReturnUrl">Login</a>
     </Column>
 </Row>
 
 @code {
+
+    [Parameter]
+    public string ReturnUrl { get; set; }
+
     string Username;
     string Password;
     bool RememberMe;
+
+    private async void LoginUser()
+    {
+        var loginModel = new { Username = Username, Password = Password, RememberMe = RememberMe, ReturnUrl = ReturnUrl };
+        await Http.PostJsonAsync(NavigationManager.ToAbsoluteUri("loginAction").ToString(), loginModel);
+    }
 
 }
