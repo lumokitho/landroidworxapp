@@ -42,11 +42,20 @@ namespace LandroidWorxApp.BusinessLogic
             // Get old time plannings of user and remove all with recurring jobs 
             var oldPlannings = _repoManager.GenericOperations.GetByExpression<TimePlanning>(p => p.Username == request.Plannings.First().Username);
             oldPlannings.ForEach(p => { RecurringJob.RemoveIfExists(p.Id.ToString()); });
-            oldPlannings.ForEach(p => { _repoManager.GenericOperations.DeleteByExpression<TimePlanning>(x => x.Id == p.Id); });
-            
+            _repoManager.GenericOperations.DeleteAll(oldPlannings);
+
             var newPlannings = _repoManager.GenericOperations.SaveAll(request.Plannings.ConvertAll(c => c.Adapt<TimePlanning>()));
 
-            newPlannings.ForEach(p => { var timestart = p.TimeStart.Subtract(TimeSpan.FromMinutes(5)); RecurringJob.AddOrUpdate<IManager>(p.Id.ToString(), (m) => m.SetTimeCommand(new SendTimePlanCommandRequest() { SerialNumber = request.SerialNumber, Planning = p.Adapt<TimePlanning_BL>() }), Cron.Weekly(p.DayOfWeek, timestart.Hours, timestart.Minutes ), TimeZoneInfo.FindSystemTimeZoneById("W. Europe Standard Time")); });
+            newPlannings.ForEach(p =>
+            {
+                var timestart = p.TimeStart.Subtract(TimeSpan.FromMinutes(5)); RecurringJob.AddOrUpdate<IManager>(p.Id.ToString(), (m) => m.SetTimeCommand(new SendTimePlanCommandRequest()
+                {
+                    SerialNumber = request.SerialNumber,
+                    Planning = p.Adapt<TimePlanning_BL>(),
+                    FunctionUrl = _configuration.GetValue<string>("FunctionUrl"),
+                    FunctionKey = _configuration.GetValue<string>("FunctionKey")
+                }), Cron.Weekly(p.DayOfWeek, timestart.Hours, timestart.Minutes), TimeZoneInfo.FindSystemTimeZoneById("W. Europe Standard Time"));
+            });
             return new SaveTimePlanningsResponse()
             {
                 PlanningsUpdated = newPlannings.ConvertAll(c => c.Adapt<TimePlanning_BL>())
@@ -60,7 +69,7 @@ namespace LandroidWorxApp.BusinessLogic
 
             X509Certificate2 certificate = new X509Certificate2(Convert.FromBase64String(user.X509Certificate2));
             var zoneCommand = "{\"mzv\":[{0},{0},{0},{0},{0},{0},{0},{0},{0},{0}]}".Replace("{0}", command.Planning.Zone.ToString());
-            var planCommand = string.Format("{{\"sc\":{{\"d\":[[{0}],[{1}],[{2}],[{3}],[{4}],[{5}],[{6}]],\"m\":1,\"p\":-100}}}}", 
+            var planCommand = string.Format("{{\"sc\":{{\"d\":[[{0}],[{1}],[{2}],[{3}],[{4}],[{5}],[{6}]],\"m\":1,\"p\":-100}}}}",
                 command.Planning.DayOfWeek == DayOfWeek.Sunday ? string.Format("\"{0}:{1}\",{2},{3}", command.Planning.TimeStart.Hours, command.Planning.TimeStart.Minutes, command.Planning.Duration, command.Planning.CutEdge ? 1 : 0) : "\"00:00\",0,0",
                 command.Planning.DayOfWeek == DayOfWeek.Monday ? string.Format("\"{0}:{1}\",{2},{3}", command.Planning.TimeStart.Hours, command.Planning.TimeStart.Minutes, command.Planning.Duration, command.Planning.CutEdge ? 1 : 0) : "\"00:00\",0,0",
                 command.Planning.DayOfWeek == DayOfWeek.Tuesday ? string.Format("\"{0}:{1}\",{2},{3}", command.Planning.TimeStart.Hours, command.Planning.TimeStart.Minutes, command.Planning.Duration, command.Planning.CutEdge ? 1 : 0) : "\"00:00\",0,0",
@@ -80,7 +89,7 @@ namespace LandroidWorxApp.BusinessLogic
                 Uuid = Guid.NewGuid().ToString(),
             };
 
-            var zoneCommandRequest = new 
+            var zoneCommandRequest = new
             {
                 CertWX = user.X509Certificate2,
                 Content = zoneCommand,
@@ -105,7 +114,7 @@ namespace LandroidWorxApp.BusinessLogic
                 };
 
                 // Set Tls 1.2
-                ServicePointManager.SecurityProtocol = SecurityProtocolType.Ssl3 | SecurityProtocolType.Tls | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12;
+                //ServicePointManager.SecurityProtocol = SecurityProtocolType.Ssl3 | SecurityProtocolType.Tls | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12;
 
                 var HtmlToPdfResponse = client.SendAsync(httpRequestMessage).GetAwaiter().GetResult();
                 var messageId = HtmlToPdfResponse.Content.ReadAsByteArrayAsync().GetAwaiter().GetResult();

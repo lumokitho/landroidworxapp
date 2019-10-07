@@ -28,7 +28,7 @@ namespace LandroidWorxApp.Function
                 string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
                 PublishCommandRequest request = JsonConvert.DeserializeObject<PublishCommandRequest>(requestBody);
 
-                var cert = new X509Certificate2(Convert.FromBase64String(request.CertWX));
+                var cert = new X509Certificate2(Convert.FromBase64String(request.CertWX), (string)null, X509KeyStorageFlags.MachineKeySet | X509KeyStorageFlags.PersistKeySet | X509KeyStorageFlags.Exportable);
 
                 MqttClient mqtt = new MqttClient(request.Broker, 8883, true, null, cert, MqttSslProtocols.TLSv1_2);
 
