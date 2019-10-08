@@ -60,7 +60,9 @@ namespace LandroidWorxApp
                 }));
 
             // Add the processing server as IHostedService
+#if !DEBUG
             services.AddHangfireServer();
+#endif
 
             services.AddServerSideBlazor().AddCircuitOptions(options => { options.DetailedErrors = true; });
 

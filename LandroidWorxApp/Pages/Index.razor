@@ -1,5 +1,6 @@
 ﻿@page "/"
 @attribute [Authorize]
+
 @using LandroidWorxApp.BusinessLogic
 @using Microsoft.Extensions.Configuration
 @using System.Globalization
@@ -106,36 +107,36 @@
 </div>
 
 @code{
+
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationStateTask { get; set; }
+
     Data data = new Data();
     LandroidWorxApp.BusinessLogic.Config config = new LandroidWorxApp.BusinessLogic.Config();
     string nextZone = string.Empty;
     string batteryStatus = "empty";
     string bearerToken = string.Empty;
+    string username = string.Empty;
     string serialNumber = string.Empty;
     string broker = string.Empty;
     string cmdInPath = string.Empty;
     string cmdOutPath = string.Empty;
+    
 
     protected override async Task OnInitializedAsync()
     {
+        var authState = await authenticationStateTask;
+        var user = authState.User;
+        bearerToken = user.Claims.First(c => c.Type == "BearerToken").Value;
+        broker = user.Claims.First(c => c.Type == "BrokerUrl").Value;
+        username = user.Identity.Name;
         await Setup();
         await GetData();
     }
 
     public async Task Setup()
     {
-        var response = LsClientWeb.Login(new LsClientWeb_LoginRequest()
-        {
-            ClientSecret = Configuration.GetValue<string>("ClientSecret"),
-            GrantType = "password",
-            Scope = "*",
-            Username = "roberto.gualandris@hotmail.it",
-            Password = "ilguala11"
-        });
-
-        var products = LsClientWeb.GetProducts(new LsClientWeb_GetProductsRequest() { BearerToken = response.BearerToken, Username = "roberto.gualandris@hotmail.it" });
-        bearerToken = response.BearerToken;
-        broker = response.BrokerUrl;
+        var products = LsClientWeb.GetProducts(new LsClientWeb_GetProductsRequest() { BearerToken = bearerToken, Username = username });
         serialNumber = products.Products.First().SerialNo;
         cmdInPath = products.Products.First().Topic.CmdIn;
         cmdOutPath = products.Products.First().Topic.CmdOut;

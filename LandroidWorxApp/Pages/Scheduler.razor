@@ -1,4 +1,6 @@
 ﻿@page "/scheduler"
+@attribute [Authorize]
+
 @using System.Globalization
 @using LandroidWorxApp.BusinessLogic
 @using Microsoft.Extensions.Configuration
@@ -103,11 +105,15 @@
 
 @code
 {
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationStateTask { get; set; }
+
     TextEdit timeStart;
     DayOfWeek selectedTab = DateTime.Now.DayOfWeek;
     TabsContent days;
     Modal validationModal;
     string modalText;
+
 
     private void OnSelectedTab(string tab)
     {
@@ -127,16 +133,21 @@
     LandroidWorxApp.BusinessLogic.Config config = new LandroidWorxApp.BusinessLogic.Config();
     List<TimePlanning_BL> Plannings = new List<TimePlanning_BL>();
     TimeSchedule test;
-    string nextZone = string.Empty;
-    string batteryStatus = "empty";
+
     string bearerToken = string.Empty;
     string serialNumber = string.Empty;
     string broker = string.Empty;
-    string cmdInPath = string.Empty;
-    string cmdOutPath = string.Empty;
+    string username = string.Empty;
+
 
     protected override async Task OnInitializedAsync()
     {
+        var authState = await authenticationStateTask;
+        var user = authState.User;
+        bearerToken = user.Claims.First(c => c.Type == "BearerToken").Value;
+        broker = user.Claims.First(c => c.Type == "BrokerUrl").Value;
+        username = user.Identity.Name;
+
         await Setup();
         await GetTimePannings();
         await GetData();
@@ -145,21 +156,9 @@
 
     public async Task Setup()
     {
-        var response = LsClientWeb.Login(new LsClientWeb_LoginRequest()
-        {
-            ClientSecret = Configuration.GetValue<string>("ClientSecret"),
-            GrantType = "password",
-            Scope = "*",
-            Username = "roberto.gualandris@hotmail.it",
-            Password = "ilguala11"
-        });
 
-        var products = LsClientWeb.GetProducts(new LsClientWeb_GetProductsRequest() { BearerToken = response.BearerToken, Username ="roberto.gualandris@hotmail.it" });
-        bearerToken = response.BearerToken;
-        broker = response.BrokerUrl;
+        var products = LsClientWeb.GetProducts(new LsClientWeb_GetProductsRequest() { BearerToken = bearerToken, Username = username });
         serialNumber = products.Products.First().SerialNo;
-        cmdInPath = products.Products.First().Topic.CmdIn;
-        cmdOutPath = products.Products.First().Topic.CmdOut;
     }
 
     public async Task GetData()
@@ -167,18 +166,6 @@
         var status = LsClientWeb.GetProductStatus(new LsClientWeb_GetProductStatusRequest() { BearerToken = bearerToken, SerianNumber = serialNumber });
         data = status.Status.Dat;
         config = status.Status.Cfg;
-        if (data.Battery.Perc > 90)
-            batteryStatus = "full";
-        else if (data.Battery.Perc > 60)
-            batteryStatus = "three-quarters";
-        else if (data.Battery.Perc > 40)
-            batteryStatus = "half";
-        else if (data.Battery.Perc > 15)
-            batteryStatus = "quarter";
-        else
-            batteryStatus = "empty";
-
-        nextZone = config.MultiZones[0] > 0 ? (config.MultiZonePercs[data.LastZone] + 1).ToString() : "-";
     }
 
     public async Task GetTimePannings()
@@ -187,10 +174,6 @@
         Plannings = response.Plannings;
     }
 
-    private void HandleValidSubmit()
-    {
-        Console.WriteLine("OnValidSubmit");
-    }
 
     public void OnButtonClicked()
     {

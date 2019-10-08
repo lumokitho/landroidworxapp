@@ -6,6 +6,10 @@ namespace LandroidWorxApp.BusinessLogic
 {
     public class TimePlanning_BL
     {
+        public TimePlanning_BL()
+        {
+            Id = Guid.NewGuid();
+        }
         public Guid Id { get; set; }
         public string Username { get; set; }
         public DayOfWeek DayOfWeek { get; set; }
