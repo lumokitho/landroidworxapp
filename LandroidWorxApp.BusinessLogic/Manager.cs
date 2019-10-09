@@ -85,9 +85,15 @@ namespace LandroidWorxApp.BusinessLogic
                 Uuid = Guid.NewGuid().ToString(),
                 Handler = (object sender, MqttMsgPublishedEventArgs e) =>
                 {
+                    if(!e.IsPublished)
+                        _telemetryClient.TrackTrace("not published", Microsoft.ApplicationInsights.DataContracts.SeverityLevel.Warning, new Dictionary<string, string>() { { "IdPlanning", command.Planning.Id.ToString() }, { "planCommand", planCommand } });
+
                     ((MqttClient)sender).Disconnect();
                 }
             });
+
+            System.Threading.Thread.Sleep(10000);
+
             _lsClientWeb.PublishCommand(new LsClientWeb_PublishCommandRequest()
             {
                 CertWX = certificate,
@@ -98,6 +104,9 @@ namespace LandroidWorxApp.BusinessLogic
                 Uuid = Guid.NewGuid().ToString(),
                 Handler = (object sender, MqttMsgPublishedEventArgs e) =>
                 {
+                    if (!e.IsPublished)
+                        _telemetryClient.TrackTrace("not published", Microsoft.ApplicationInsights.DataContracts.SeverityLevel.Warning, new Dictionary<string, string>() { { "IdPlanning", command.Planning.Id.ToString() }, { "zoneCommand", zoneCommand } });
+
                     ((MqttClient)sender).Disconnect();
                 }
             });
