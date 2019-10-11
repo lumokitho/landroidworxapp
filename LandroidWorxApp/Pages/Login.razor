@@ -2,22 +2,10 @@
 @page "/Login/{ReturnUrl}"
 @using LandroidWorxApp.BusinessLogic
 @using Microsoft.Extensions.Configuration
-@using System.Security.Claims
-@using Microsoft.AspNetCore.Authentication.Cookies
-@using Microsoft.AspNetCore.Authentication
-@using System.Globalization
 @using Microsoft.AspNetCore.Http
-@using System;
-@using System.Collections.Generic;
-@using System.Threading.Tasks;
-@using Microsoft.AspNetCore.Authorization;
-@using Microsoft.AspNetCore.Mvc;
-@using Microsoft.AspNetCore.Mvc.RazorPages;
 @inject ILsClientWeb LsClientWeb
 @inject IConfiguration Configuration
-@inject IHttpContextAccessor HostedContext
-@inject NavigationManager NavigationManager
-@inject HttpClient Http
+@inject IJSRuntime JsRuntime
 
 <Row Class="justify-content-center">
     <Column ColumnSize="ColumnSize.IsAuto">
@@ -35,8 +23,7 @@
             <CheckEdit @bind-Checked="RememberMe">Remember me</CheckEdit>
         </Field>
 
-        @*<Button Color="Color.Info" Clicked="LoginUser">Login</Button>*@
-        <a class="btn btn-info" href="/loginAction?username=@Username&password=@Password&rememberme=@RememberMe&returnUrl=@ReturnUrl">Login</a>
+        <Button Color="Color.Info" Clicked="LoginUser">Login</Button>
     </Column>
 </Row>
 
@@ -51,8 +38,10 @@
 
     private async void LoginUser()
     {
-        var loginModel = new { Username = Username, Password = Password, RememberMe = RememberMe, ReturnUrl = ReturnUrl };
-        await Http.PostJsonAsync(NavigationManager.ToAbsoluteUri("loginAction").ToString(), loginModel);
+        var interop = new Interop(JsRuntime);
+        string antiforgerytoken = await interop.GetElementByName("__RequestVerificationToken");
+        var fields = new { __RequestVerificationToken = antiforgerytoken, username = Username, password = Password, rememberMe = RememberMe, returnUrl = ReturnUrl };
+        await interop.SubmitForm("/loginaction/", fields);
     }
 
 }
