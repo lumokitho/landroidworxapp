@@ -12,6 +12,7 @@
 @inject IConfiguration Configuration
 @inject IJSRuntime JSRuntime
 
+
 <Tabs SelectedTabChanged="OnSelectedTab" IsJustified="true" IsPills="true" Class="days mx-n4">
     <Tab Name="@DayOfWeek.Monday.ToString()" IsActive="selectedTab == DayOfWeek.Monday">@CultureInfo.CurrentCulture.DateTimeFormat.AbbreviatedDayNames[(int)DayOfWeek.Monday].ToUpper()</Tab>
     <Tab Name="@DayOfWeek.Tuesday.ToString()" IsActive="selectedTab == DayOfWeek.Tuesday">@CultureInfo.CurrentCulture.DateTimeFormat.AbbreviatedDayNames[(int)DayOfWeek.Tuesday].ToUpper()</Tab>
@@ -78,6 +79,19 @@
 
 </TabsContent>
 
+<Row Class="mt-3">
+    <Column ColumnSize="ColumnSize.IsAuto">
+        <span>@config.Schedule.Perc</span>
+    </Column>
+    <Column>
+        <Field>
+            <label for="work-percentage">Work Percentage</label>
+            <input type="range" class="form-control-range" id="work-percentage" step="10" min="-100" max="100" @bind-value="config.Schedule.Perc" />
+        </Field>         
+    </Column>
+</Row>
+
+
 <Row Class="mt-2">
     <Column>
         <Button Color="Color.Info" Clicked="@AddTimeSchedule">Add Time</Button>
@@ -139,7 +153,6 @@
     string broker = string.Empty;
     string username = string.Empty;
 
-
     protected override async Task OnInitializedAsync()
     {
         var authState = await authenticationStateTask;
@@ -183,7 +196,7 @@
             validationModal.Show();
             return;
         }
-        Manager.SaveTimePlanningsRequest(new SaveTimePlanningsRequest() { Plannings = Plannings, SerialNumber = serialNumber });
+        Manager.SaveTimePlanningsRequest(new SaveTimePlanningsRequest() { Plannings = Plannings, SerialNumber = serialNumber, WorkPercentage = config.Schedule.Perc });
     }
 
     public void AddTimeSchedule()

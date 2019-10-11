@@ -46,7 +46,7 @@ namespace LandroidWorxApp.BusinessLogic
 
             var newPlannings = _repoManager.GenericOperations.SaveAll(request.Plannings.ConvertAll(c => c.Adapt<TimePlanning>()));
 
-            newPlannings.ForEach(p => { var timestart = p.TimeStart.Subtract(TimeSpan.FromMinutes(5)); RecurringJob.AddOrUpdate<IManager>(p.Id.ToString(), (m) => m.SetTimeCommand(new SendTimePlanCommandRequest() { SerialNumber = request.SerialNumber, Planning = p.Adapt<TimePlanning_BL>() }), Cron.Weekly(p.DayOfWeek, timestart.Hours, timestart.Minutes), TimeZoneInfo.FindSystemTimeZoneById("W. Europe Standard Time")); });
+            newPlannings.ForEach(p => { var timestart = p.TimeStart.Subtract(TimeSpan.FromMinutes(5)); RecurringJob.AddOrUpdate<IManager>(p.Id.ToString(), (m) => m.SetTimeCommand(new SendTimePlanCommandRequest() { WorkPercentage = request.WorkPercentage, SerialNumber = request.SerialNumber, Planning = p.Adapt<TimePlanning_BL>() }), Cron.Weekly(p.DayOfWeek, timestart.Hours, timestart.Minutes), TimeZoneInfo.FindSystemTimeZoneById("W. Europe Standard Time")); });
             return new SaveTimePlanningsResponse()
             {
                 PlanningsUpdated = newPlannings.ConvertAll(c => c.Adapt<TimePlanning_BL>())
@@ -61,14 +61,15 @@ namespace LandroidWorxApp.BusinessLogic
             X509Certificate2 certificate = new X509Certificate2(Convert.FromBase64String(user.X509Certificate2), (string)null, X509KeyStorageFlags.MachineKeySet | X509KeyStorageFlags.PersistKeySet | X509KeyStorageFlags.Exportable);
 
             var zoneCommand = "{\"mzv\":[{0},{0},{0},{0},{0},{0},{0},{0},{0},{0}]}".Replace("{0}", command.Planning.Zone.ToString());
-            var planCommand = string.Format("{{\"sc\":{{\"d\":[[{0}],[{1}],[{2}],[{3}],[{4}],[{5}],[{6}]],\"m\":1,\"p\":0}}}}",
+            var planCommand = string.Format("{{\"sc\":{{\"d\":[[{0}],[{1}],[{2}],[{3}],[{4}],[{5}],[{6}]],\"m\":1,\"p\":{7}}}}}",
                 command.Planning.DayOfWeek == DayOfWeek.Sunday ? string.Format("\"{0}:{1}\",{2},{3}", command.Planning.TimeStart.Hours, command.Planning.TimeStart.Minutes, command.Planning.Duration, command.Planning.CutEdge ? 1 : 0) : "\"00:00\",0,0",
                 command.Planning.DayOfWeek == DayOfWeek.Monday ? string.Format("\"{0}:{1}\",{2},{3}", command.Planning.TimeStart.Hours, command.Planning.TimeStart.Minutes, command.Planning.Duration, command.Planning.CutEdge ? 1 : 0) : "\"00:00\",0,0",
                 command.Planning.DayOfWeek == DayOfWeek.Tuesday ? string.Format("\"{0}:{1}\",{2},{3}", command.Planning.TimeStart.Hours, command.Planning.TimeStart.Minutes, command.Planning.Duration, command.Planning.CutEdge ? 1 : 0) : "\"00:00\",0,0",
                 command.Planning.DayOfWeek == DayOfWeek.Wednesday ? string.Format("\"{0}:{1}\",{2},{3}", command.Planning.TimeStart.Hours, command.Planning.TimeStart.Minutes, command.Planning.Duration, command.Planning.CutEdge ? 1 : 0) : "\"00:00\",0,0",
                 command.Planning.DayOfWeek == DayOfWeek.Thursday ? string.Format("\"{0}:{1}\",{2},{3}", command.Planning.TimeStart.Hours, command.Planning.TimeStart.Minutes, command.Planning.Duration, command.Planning.CutEdge ? 1 : 0) : "\"00:00\",0,0",
                 command.Planning.DayOfWeek == DayOfWeek.Friday ? string.Format("\"{0}:{1}\",{2},{3}", command.Planning.TimeStart.Hours, command.Planning.TimeStart.Minutes, command.Planning.Duration, command.Planning.CutEdge ? 1 : 0) : "\"00:00\",0,0",
-                command.Planning.DayOfWeek == DayOfWeek.Saturday ? string.Format("\"{0}:{1}\",{2},{3}", command.Planning.TimeStart.Hours, command.Planning.TimeStart.Minutes, command.Planning.Duration, command.Planning.CutEdge ? 1 : 0) : "\"00:00\",0,0"
+                command.Planning.DayOfWeek == DayOfWeek.Saturday ? string.Format("\"{0}:{1}\",{2},{3}", command.Planning.TimeStart.Hours, command.Planning.TimeStart.Minutes, command.Planning.Duration, command.Planning.CutEdge ? 1 : 0) : "\"00:00\",0,0",
+                command.WorkPercentage
                 );
 
             _telemetryClient.TrackTrace("ZoneCommand", Microsoft.ApplicationInsights.DataContracts.SeverityLevel.Information, new Dictionary<string, string>() { { "IdPlanning", command.Planning.Id.ToString() }, { "ZoneCommand", zoneCommand } });
