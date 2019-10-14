@@ -80,14 +80,14 @@
 </TabsContent>
 
 <Row Class="mt-3">
-    <Column ColumnSize="ColumnSize.IsAuto">
+    <Column ColumnSize="ColumnSize.Is1">
         <span>@config.Schedule.Perc</span>
     </Column>
     <Column>
         <Field>
             <label for="work-percentage">Work Percentage</label>
             <input type="range" class="form-control-range" id="work-percentage" step="10" min="-100" max="100" @bind-value="config.Schedule.Perc" />
-        </Field>         
+        </Field>
     </Column>
 </Row>
 
@@ -95,26 +95,9 @@
 <Row Class="mt-2">
     <Column>
         <Button Color="Color.Info" Clicked="@AddTimeSchedule">Add Time</Button>
-        <Button Color="Color.Primary" Clicked="@OnButtonClicked">Save Scheduler</Button>
+        <Button Color="Color.Success" Clicked="@OnButtonClicked">Save Scheduler</Button>
     </Column>
 </Row>
-
-
-<Modal @ref="validationModal">
-    <ModalBackdrop />
-    <ModalContent IsCentered="true">
-        <ModalHeader>
-            <ModalTitle>Attention</ModalTitle>
-            <CloseButton Clicked="() => validationModal.Hide()" />
-        </ModalHeader>
-        <ModalBody>
-            @modalText;
-        </ModalBody>
-        <ModalFooter>
-            <Button Color="Color.Secondary" Clicked="() => validationModal.Hide()">Close</Button>
-        </ModalFooter>
-    </ModalContent>
-</Modal>
 
 
 @code
@@ -125,8 +108,6 @@
     TextEdit timeStart;
     DayOfWeek selectedTab = DateTime.Now.DayOfWeek;
     TabsContent days;
-    Modal validationModal;
-    string modalText;
 
 
     private void OnSelectedTab(string tab)
@@ -188,15 +169,19 @@
     }
 
 
-    public void OnButtonClicked()
+    public async Task OnButtonClicked()
     {
+        var interop = new Interop(JSRuntime);
+        await interop.Overlay(true);
         if (Plannings.Any(p => p.Duration <= 0))
         {
-            modalText = "Duration can not be equal or less then 0";
-            validationModal.Show();
+            await interop.Overlay(false);
+            await interop.ShowSwallAlert("warning", "Attention", "Duration can not be equal or less then 0", "OK", null, null);
             return;
         }
         Manager.SaveTimePlanningsRequest(new SaveTimePlanningsRequest() { Plannings = Plannings, SerialNumber = serialNumber, WorkPercentage = config.Schedule.Perc });
+        await interop.Overlay(false);
+        await interop.ShowSwallAlert("success", "Save Scheduler", "Scheduler saved", "OK", null, null);
     }
 
     public void AddTimeSchedule()

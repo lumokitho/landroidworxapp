@@ -18,6 +18,19 @@
     <link rel="stylesheet" href="css/site.css" />
 </head>
 <body>
+    <!--Overlay-->
+    <div id="overlay" style="display: none;">
+        <div class="span position-relative h-100">
+            <div class="row w-100 position-absolute">
+                <div class="timer"></div>
+                <div class="overlay-delete">
+                    <a href="javascript:interop.hideOverlay();" style="color: #999999;font-size: 20px;">Annulla</a>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
     <app>@(await Html.RenderComponentAsync<App>(RenderMode.Server))</app>
     @(Html.AntiForgeryToken())
     <script src="_framework/blazor.server.js"></script>
@@ -26,6 +39,7 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
     <script src="_content/Blazorise/blazorise.js"></script>
     <script src="_content/Blazorise.Bootstrap/blazorise.bootstrap.js"></script>
+    <script src="~/lib/sweetalert/sweetalert.min.js"></script>
     <script src="~/lib/bootstrap-timepicker/js/bootstrap-timepicker.min.js"></script>
     <script src="~/lib/custom.js"></script>
 </body>

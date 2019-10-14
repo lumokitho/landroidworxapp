@@ -41,5 +41,31 @@ namespace LandroidWorxApp
             {
             }
         }
+
+        public async Task ShowSwallAlert(string type, string title, string message, string confirmBtnText, string cancelBtnText, object callback)
+        {
+            try
+            {
+                await _jsRuntime.InvokeVoidAsync(
+                    "interop.showSwallAlert",
+                    type, title, message, confirmBtnText, cancelBtnText, callback);
+            }
+            catch
+            {
+            }
+        }
+
+        public async Task Overlay(bool show, object callback = null)
+        {
+            try
+            {
+                await _jsRuntime.InvokeVoidAsync(
+                    show ? "interop.showOverlay" : "interop.hideOverlay",
+                    callback);
+            }
+            catch
+            {
+            }
+        }
     }
 }
