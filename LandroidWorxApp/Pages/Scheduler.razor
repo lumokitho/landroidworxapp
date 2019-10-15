@@ -151,13 +151,13 @@
     public async Task Setup()
     {
 
-        var products = LsClientWeb.GetProducts(new LsClientWeb_GetProductsRequest() { BearerToken = bearerToken, Username = username });
+        var products = await LsClientWeb.GetProducts(new LsClientWeb_GetProductsRequest() { BearerToken = bearerToken, Username = username });
         serialNumber = products.Products.First().SerialNo;
     }
 
     public async Task GetData()
     {
-        var status = LsClientWeb.GetProductStatus(new LsClientWeb_GetProductStatusRequest() { BearerToken = bearerToken, SerianNumber = serialNumber });
+        var status = await LsClientWeb.GetProductStatus(new LsClientWeb_GetProductStatusRequest() { BearerToken = bearerToken, SerianNumber = serialNumber });
         data = status.Status.Dat;
         config = status.Status.Cfg;
     }

@@ -37,7 +37,7 @@ namespace LandroidWorxApp.Pages
             catch { }
 
 
-            var response = _lsClientWeb.Login(new LsClientWeb_LoginRequest()
+            var response = await _lsClientWeb.Login(new LsClientWeb_LoginRequest()
             {
                 ClientSecret = _configuration.GetValue<string>("ClientSecret"),
                 GrantType = "password",

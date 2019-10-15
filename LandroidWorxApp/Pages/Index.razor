@@ -8,7 +8,7 @@
 @using uPLibrary.Networking.M2Mqtt.Messages;
 @inject ILsClientWeb LsClientWeb
 @inject IConfiguration Configuration
-
+@inject IJSRuntime JSRuntime
 
 <div class="row">
     <div class="col align-self-center battery">
@@ -17,7 +17,7 @@
         <span class="info">@(data.Battery.Volt)V @(data.Battery.Temp)°</span>
     </div>
     <div class="col align-self-center status text-center">
-        <div><b>@data.LastState</b></div>      
+        <div><b>@data.LastState</b></div>
     </div>
     <div class="col align-self-center text-right wifi">
         <i class="fas fa-wifi" style="font-size:2em;color:#cc5f28"></i>
@@ -30,17 +30,17 @@
 
 <div class="row mt-5">
     <div class="col align-self-center text-center text-sm-right">
-        <span class="info">Slope: @data.Orient[0]°</span>
+        <span class="info">Slope: @data.Orient?[0]°</span>
     </div>
     <div class="col col-sm-auto text-center landroid">
         <img src="/img/landroid.png" alt="Robertino Robottino" />
     </div>
     <div class="col align-self-center text-center text-sm-left">
-        <span class="info">Direction: @data.Orient[2]°</span>
+        <span class="info">Direction: @data.Orient?[2]°</span>
     </div>
 </div>
 <div class="text-center">
-    <span class="info">Roll: @data.Orient[1]°</span>
+    <span class="info">Roll: @data.Orient?[1]°</span>
 </div>
 
 
@@ -113,7 +113,7 @@
     private Task<AuthenticationState> authenticationStateTask { get; set; }
 
     Data data = new Data();
-    LandroidWorxApp.BusinessLogic.Config config = new LandroidWorxApp.BusinessLogic.Config();
+    LandroidWorxApp.BusinessLogic.Config config = new LandroidWorxApp.BusinessLogic.Config() { Schedule = new Schedule() };
     string nextZone = string.Empty;
     string batteryStatus = "empty";
     string bearerToken = string.Empty;
@@ -122,7 +122,7 @@
     string broker = string.Empty;
     string cmdInPath = string.Empty;
     string cmdOutPath = string.Empty;
-    
+    Interop interop;
 
     protected override async Task OnInitializedAsync()
     {
@@ -131,13 +131,24 @@
         bearerToken = user.Claims.First(c => c.Type == "BearerToken").Value;
         broker = user.Claims.First(c => c.Type == "BrokerUrl").Value;
         username = user.Identity.Name;
-        await Setup();
-        await GetData();
+        interop = new Interop(JSRuntime);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await interop.Overlay(true);
+            await Setup();
+            await GetData();
+            StateHasChanged();
+            await interop.Overlay(false);
+        }
     }
 
     public async Task Setup()
     {
-        var products = LsClientWeb.GetProducts(new LsClientWeb_GetProductsRequest() { BearerToken = bearerToken, Username = username });
+        var products = await LsClientWeb.GetProducts(new LsClientWeb_GetProductsRequest() { BearerToken = bearerToken, Username = username });
         serialNumber = products.Products.First().SerialNo;
         cmdInPath = products.Products.First().Topic.CmdIn;
         cmdOutPath = products.Products.First().Topic.CmdOut;
@@ -145,7 +156,8 @@
 
     public async Task GetData()
     {
-        var status = LsClientWeb.GetProductStatus(new LsClientWeb_GetProductStatusRequest() { BearerToken = bearerToken, SerianNumber = serialNumber });
+        await interop.Overlay(true);
+        var status = await LsClientWeb.GetProductStatus(new LsClientWeb_GetProductStatusRequest() { BearerToken = bearerToken, SerianNumber = serialNumber });
         data = status.Status.Dat;
         config = status.Status.Cfg;
         if (data.Battery.Perc > 90)
@@ -160,10 +172,12 @@
             batteryStatus = "empty";
 
         nextZone = config.MultiZones[0] > 0 ? (config.MultiZonePercs[data.LastZone] + 1).ToString() : "-";
+        await interop.Overlay(false);
     }
 
     public async Task Start()
     {
+        await interop.Overlay(true);
         var response = LsClientWeb.PublishCommand(new LsClientWeb_PublishCommandRequest()
         {
             BearerToken = bearerToken,
@@ -178,6 +192,7 @@
 
     public async Task Stop()
     {
+        await interop.Overlay(true);
         var response = LsClientWeb.PublishCommand(new LsClientWeb_PublishCommandRequest()
         {
             BearerToken = bearerToken,
@@ -192,6 +207,7 @@
 
     public async Task GoHome()
     {
+        await interop.Overlay(true);
         var response = LsClientWeb.PublishCommand(new LsClientWeb_PublishCommandRequest()
         {
             BearerToken = bearerToken,
@@ -208,10 +224,11 @@
     {
         ((MqttClient)sender).Disconnect();
 
-        InvokeAsync(() =>
+        InvokeAsync(async () =>
         {
-            GetData();
+            await GetData();
             StateHasChanged();
+            await interop.Overlay(false);
         });
     }
 }

@@ -21,7 +21,7 @@
     public async Task DoAction()
     {
         await Task.Delay(5000);
-        var response = LsClientWeb.Login(new LsClientWeb_LoginRequest()
+        var response = await LsClientWeb.Login(new LsClientWeb_LoginRequest()
         {
             ClientSecret = Configuration.GetValue<string>("ClientSecret"),
             GrantType = "password",
@@ -30,7 +30,7 @@
             Password = "ilguala11"
         });
 
-        var products = LsClientWeb.GetProducts(new LsClientWeb_GetProductsRequest() { BearerToken = response.BearerToken, Username = "roberto.gualandris@hotmail.it" });
+        var products = await LsClientWeb.GetProducts(new LsClientWeb_GetProductsRequest() { BearerToken = response.BearerToken, Username = "roberto.gualandris@hotmail.it" });
         var cmdInPath = products.Products.First().Topic.CmdIn;
         var cmdOutPath = products.Products.First().Topic.CmdOut;
         var msgSent = LsClientWeb.PublishCommand(new LsClientWeb_PublishCommandRequest()

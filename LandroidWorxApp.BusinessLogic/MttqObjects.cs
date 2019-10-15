@@ -114,12 +114,11 @@ namespace LandroidWorxApp.BusinessLogic
         [DataMember(Name = "rd")] public int RainDelay;
         [DataMember(Name = "sn")] public string SerialNo;
 
-        public DateTime LastUpdate
+        public string LastUpdate
         {
             get
             {
-                string dts = string.Format("{0} {1}", Date, Time); // parsable DateTime string
-                return DateTime.ParseExact(dts, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture);
+                return string.Format("{0} {1}", Date, Time); // parsable DateTime string
             }
         }
 
@@ -127,19 +126,23 @@ namespace LandroidWorxApp.BusinessLogic
         {
             get
             {
+                if (DateTime.TryParseExact(LastUpdate, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime value) && Schedule.Days != null)
+                {
+                    int idx = (int)value.DayOfWeek;
+                    TimeSpan beg = TimeSpan.ParseExact(Schedule.Days[idx][0].ToString(), @"hh\:mm", CultureInfo.InvariantCulture);
+                    int min = (int)Schedule.Days[idx][1];
+                    int dur = min + min * Schedule.Perc / 100;
+                    TimeSpan end = beg + TimeSpan.FromMinutes(dur);
+                    TimeSpan cur = TimeSpan.ParseExact(Time, @"hh\:mm\:ss", CultureInfo.InvariantCulture);
+                    int perc;
 
-                int idx = (int)LastUpdate.DayOfWeek;
-                TimeSpan beg = TimeSpan.ParseExact(Schedule.Days[idx][0].ToString(), @"hh\:mm", CultureInfo.InvariantCulture);
-                int min = (int)Schedule.Days[idx][1];
-                int dur = min + min * Schedule.Perc / 100;
-                TimeSpan end = beg + TimeSpan.FromMinutes(dur);
-                TimeSpan cur = TimeSpan.ParseExact(Time, @"hh\:mm\:ss", CultureInfo.InvariantCulture);
-                int perc;
+                    if (cur < beg) perc = 0;
+                    else if (cur > end) perc = 100;
+                    else perc = (int)(cur - beg).TotalMinutes * 100 / dur;
+                    return string.Format(@"{0:hh\:mm}-{1:hh\:mm} {2}%", beg, end, perc);
+                }
 
-                if (cur < beg) perc = 0;
-                else if (cur > end) perc = 100;
-                else perc = (int)(cur - beg).TotalMinutes * 100 / dur;
-                return string.Format(@"{0:hh\:mm}-{1:hh\:mm} {2}%", beg, end, perc);
+                return string.Empty;
             }
         }
     }
