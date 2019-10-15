@@ -402,6 +402,22 @@ span.info {
     }
 }
 
+/* Products */
+.product {
+    cursor:pointer;
+    background-color: #fafafa;
+    border-radius: 5px;
+    box-shadow: 0 2px 3px rgba(10,10,10,.1), 0 0 0 1px rgba(10,10,10,.1);
+}
+
+.product img {
+    width:70%
+}
+
+.product input {
+    width: 50px;
+}
+
 @media (max-width: 767.98px) {
     .main .top-row {
         display: none;

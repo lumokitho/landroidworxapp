@@ -9,7 +9,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LandroidWorxApp.BusinessLog
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LandroidWorxApp.DataLayer", "LandroidWorxApp.DataLayer\LandroidWorxApp.DataLayer.csproj", "{FD76BF92-40B7-48B5-8622-908DEA0E74D4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LandroidWorxApp.AlwaysOn", "LandroidWorxApp.AlwaysOn\LandroidWorxApp.AlwaysOn.csproj", "{A10114C2-B1F1-4ACB-BC59-BC1B3B9AED15}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LandroidWorxApp.AlwaysOn", "LandroidWorxApp.AlwaysOn\LandroidWorxApp.AlwaysOn.csproj", "{A10114C2-B1F1-4ACB-BC59-BC1B3B9AED15}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
