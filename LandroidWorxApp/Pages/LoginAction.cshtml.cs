@@ -26,7 +26,7 @@ namespace LandroidWorxApp.Pages
 
         public async Task<IActionResult> OnPostAsync(string username, string password, bool rememberMe, string returnUrl)
         {
-            returnUrl = returnUrl ?? Url.Content("~/");
+            returnUrl = returnUrl ?? Url.Content("~/products");
             try
             {
                 // Clear the existing external cookie
@@ -62,6 +62,7 @@ namespace LandroidWorxApp.Pages
             };
             try
             {
+           
                 await HttpContext.SignInAsync(
                 CookieAuthenticationDefaults.AuthenticationScheme,
                 new ClaimsPrincipal(claimsIdentity),

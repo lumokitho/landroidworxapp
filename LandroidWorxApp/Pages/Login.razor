@@ -1,5 +1,4 @@
 ﻿@page "/Login"
-@page "/Login/{ReturnUrl}"
 @using LandroidWorxApp.BusinessLogic
 @using Microsoft.Extensions.Configuration
 @using Microsoft.AspNetCore.Http
@@ -30,9 +29,6 @@
 
 @code {
 
-    [Parameter]
-    public string ReturnUrl { get; set; }
-
     string Username;
     string Password;
     bool RememberMe;
@@ -41,7 +37,7 @@
     {
         var interop = new Interop(JsRuntime);
         string antiforgerytoken = await interop.GetElementByName("__RequestVerificationToken");
-        var fields = new { __RequestVerificationToken = antiforgerytoken, username = Username, password = Password, rememberMe = RememberMe, returnUrl = ReturnUrl };
+        var fields = new { __RequestVerificationToken = antiforgerytoken, username = Username, password = Password, rememberMe = RememberMe };
         await interop.SubmitForm("/loginaction/", fields);
     }
 

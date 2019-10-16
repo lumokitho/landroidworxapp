@@ -9,6 +9,7 @@
 @inject ILsClientWeb LsClientWeb
 @inject IConfiguration Configuration
 @inject IJSRuntime JSRuntime
+@inject NavigationManager NavigationManager
 
 <div class="row">
     <div class="col align-self-center battery">
@@ -27,8 +28,9 @@
 </div>
 
 <div class="mt-3 text-center"><span class="info"><b>Next working hours:&nbsp;</b>@config.NextWorkingHours</span></div>
+<div class="mt-5 text-center status"><b>@productName</b></div>
 
-<div class="row mt-5">
+<div class="row mt-1">
     <div class="col align-self-center text-center text-sm-right">
         <span class="info">Slope: @data.Orient?[0]°</span>
     </div>
@@ -122,6 +124,7 @@
     string broker = string.Empty;
     string cmdInPath = string.Empty;
     string cmdOutPath = string.Empty;
+    string productName = string.Empty;
     Interop interop;
 
     protected override async Task OnInitializedAsync()
@@ -131,7 +134,14 @@
         bearerToken = user.Claims.First(c => c.Type == "BearerToken").Value;
         broker = user.Claims.First(c => c.Type == "BrokerUrl").Value;
         username = user.Identity.Name;
+        serialNumber = user.Claims.FirstOrDefault(c => c.Type == "SelectedProductSN")?.Value;
+        cmdInPath = user.Claims.FirstOrDefault(c => c.Type == "CmdInPath")?.Value;
+        cmdOutPath = user.Claims.FirstOrDefault(c => c.Type == "CmdOutPath")?.Value;
+        productName =  user.Claims.FirstOrDefault(c => c.Type == "SelectedProductName")?.Value;
         interop = new Interop(JSRuntime);
+
+        if (string.IsNullOrWhiteSpace(serialNumber))
+            NavigationManager.NavigateTo("products");
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -139,19 +149,10 @@
         if (firstRender)
         {
             await interop.Overlay(true);
-            await Setup();
             await GetData();
             StateHasChanged();
             await interop.Overlay(false);
         }
-    }
-
-    public async Task Setup()
-    {
-        var products = await LsClientWeb.GetProducts(new LsClientWeb_GetProductsRequest() { BearerToken = bearerToken, Username = username });
-        serialNumber = products.Products.First().SerialNo;
-        cmdInPath = products.Products.First().Topic.CmdIn;
-        cmdOutPath = products.Products.First().Topic.CmdOut;
     }
 
     public async Task GetData()

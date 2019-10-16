@@ -11,7 +11,7 @@
 @inject IManager Manager
 @inject IConfiguration Configuration
 @inject IJSRuntime JSRuntime
-
+@inject NavigationManager NavigationManager
 
 <Tabs SelectedTabChanged="OnSelectedTab" IsJustified="true" IsPills="true" Class="days mx-n4">
     <Tab Name="@DayOfWeek.Monday.ToString()" IsActive="selectedTab == DayOfWeek.Monday">@CultureInfo.CurrentCulture.DateTimeFormat.AbbreviatedDayNames[(int)DayOfWeek.Monday].ToUpper()</Tab>
@@ -80,12 +80,12 @@
 </TabsContent>
 
 <Row Class="mt-3">
-    <Column ColumnSize="ColumnSize.Is1">
-        <span>@config.Schedule.Perc</span>
+    <Column ColumnSize="ColumnSize.Is1" Class="align-self-center text-center">
+        <span><b>@config.Schedule.Perc</b></span>
     </Column>
     <Column>
         <Field>
-            <label for="work-percentage">Work Percentage</label>
+            <label for="work-percentage"><b>Work Percentage</b></label>
             <input type="range" class="form-control-range" id="work-percentage" step="10" min="-100" max="100" @bind-value="config.Schedule.Perc" />
         </Field>
     </Column>
@@ -141,18 +141,17 @@
         bearerToken = user.Claims.First(c => c.Type == "BearerToken").Value;
         broker = user.Claims.First(c => c.Type == "BrokerUrl").Value;
         username = user.Identity.Name;
+        serialNumber = user.Claims.FirstOrDefault(c => c.Type == "SelectedProductSN")?.Value;
+        if (string.IsNullOrWhiteSpace(serialNumber))
+        {
+            NavigationManager.NavigateTo("products");
+            return;
+        }
 
-        await Setup();
+
         await GetTimePannings();
         await GetData();
 
-    }
-
-    public async Task Setup()
-    {
-
-        var products = await LsClientWeb.GetProducts(new LsClientWeb_GetProductsRequest() { BearerToken = bearerToken, Username = username });
-        serialNumber = products.Products.First().SerialNo;
     }
 
     public async Task GetData()

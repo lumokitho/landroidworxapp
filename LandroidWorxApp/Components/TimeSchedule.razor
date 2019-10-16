@@ -3,22 +3,22 @@
 <Row Class="mt-4">
     <Column ColumnSize="ColumnSize.Is4.Is3.OnDesktop">
         <Field>
-            <FieldLabel>Time Start</FieldLabel>
+            <FieldLabel><b>Time Start</b></FieldLabel>
             <TextEdit Class="timepicker" Placeholder="00:00" Text="@Planning.TimeStart.ToString(@"hh\:mm")"  TextChanged ="SetTime" >
             </TextEdit>
         </Field>
     </Column>
     <Column ColumnSize="ColumnSize.Is4.Is3.OnDesktop">
         <Field>
-            <FieldLabel>Duration</FieldLabel>
+            <FieldLabel><b>Duration</b></FieldLabel>
             <NumericEdit TValue="int" @bind-Value="Planning.Duration" />
         </Field>
     </Column>
-    @if (Config.MultiZones.Count() > 0)
+    @if (Config.MultiZones != null && Config.MultiZones.Count() > 0)
     {
         <Column ColumnSize="ColumnSize.Is4.Is3.OnDesktop">
             <Field>
-                <FieldLabel>Zone</FieldLabel>
+                <FieldLabel><b>Zone</b></FieldLabel>
                 <SelectEdit TValue="int" @bind-SelectedValue="Planning.Zone">
                     @foreach (var item in Config.MultiZones)
                     {
@@ -34,7 +34,7 @@
     <Column ColumnSize="ColumnSize.IsAuto" Class="align-self-center">
         <Field>
             <FieldLabel>&nbsp;</FieldLabel>
-            <CheckEdit @bind-Checked="Planning.CutEdge">Cut Edge</CheckEdit>
+            <CheckEdit @bind-Checked="Planning.CutEdge"><b>Cut Edge</b></CheckEdit>
         </Field>
     </Column>
     <Column ColumnSize="ColumnSize.IsAuto" Class="align-self-center">
