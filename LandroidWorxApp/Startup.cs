@@ -39,7 +39,7 @@ namespace LandroidWorxApp
             services.AddSingleton<IManager>(x => new Manager(Configuration, "LandroidWorxAppData"));
             services.AddBlazorise(options =>
              {
-                 options.ChangeTextOnKeyPress = true; // optional
+                 options.ChangeTextOnKeyPress = false; // optional
              });
             services.AddFontAwesomeIcons();
             services.AddBootstrapProviders();

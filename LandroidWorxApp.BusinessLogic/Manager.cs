@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
+using System.Threading.Tasks;
 using uPLibrary.Networking.M2Mqtt;
 using uPLibrary.Networking.M2Mqtt.Messages;
 
@@ -53,7 +54,7 @@ namespace LandroidWorxApp.BusinessLogic
             };
         }
 
-        public void SetTimeCommand(SendTimePlanCommandRequest command)
+        public async Task SetTimeCommand(SendTimePlanCommandRequest command)
         {
             UserData user = _repoManager.GenericOperations.GetSingleByExpression<UserData>(u => u.Username == command.Planning.Username);
             UserProduct product = _repoManager.GenericOperations.GetSingleByExpression<UserProduct>(p => p.SerialNumber == command.SerialNumber);
@@ -76,7 +77,7 @@ namespace LandroidWorxApp.BusinessLogic
             _telemetryClient.TrackTrace("planCommand", Microsoft.ApplicationInsights.DataContracts.SeverityLevel.Information, new Dictionary<string, string>() { { "IdPlanning", command.Planning.Id.ToString() }, { "PlanCommand", planCommand } });
 
 
-            _lsClientWeb.PublishCommand(new LsClientWeb_PublishCommandRequest()
+            await _lsClientWeb.PublishCommand(new LsClientWeb_PublishCommandRequest()
             {
                 CertWX = certificate,
                 Content = planCommand,
@@ -93,9 +94,9 @@ namespace LandroidWorxApp.BusinessLogic
                 }
             });
 
-            System.Threading.Thread.Sleep(10000);
+            await Task.Delay(10000);
 
-            _lsClientWeb.PublishCommand(new LsClientWeb_PublishCommandRequest()
+            await _lsClientWeb.PublishCommand(new LsClientWeb_PublishCommandRequest()
             {
                 CertWX = certificate,
                 Content = zoneCommand,

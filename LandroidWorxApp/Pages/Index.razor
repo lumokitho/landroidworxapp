@@ -179,7 +179,7 @@
     public async Task Start()
     {
         await interop.Overlay(true);
-        var response = LsClientWeb.PublishCommand(new LsClientWeb_PublishCommandRequest()
+        var response = await LsClientWeb.PublishCommand(new LsClientWeb_PublishCommandRequest()
         {
             BearerToken = bearerToken,
             Broker = broker,
@@ -194,7 +194,7 @@
     public async Task Stop()
     {
         await interop.Overlay(true);
-        var response = LsClientWeb.PublishCommand(new LsClientWeb_PublishCommandRequest()
+        var response = await LsClientWeb.PublishCommand(new LsClientWeb_PublishCommandRequest()
         {
             BearerToken = bearerToken,
             Broker = broker,
@@ -209,7 +209,7 @@
     public async Task GoHome()
     {
         await interop.Overlay(true);
-        var response = LsClientWeb.PublishCommand(new LsClientWeb_PublishCommandRequest()
+        var response = await LsClientWeb.PublishCommand(new LsClientWeb_PublishCommandRequest()
         {
             BearerToken = bearerToken,
             Broker = broker,

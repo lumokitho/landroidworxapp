@@ -10,6 +10,6 @@ namespace LandroidWorxApp.BusinessLogic
         Task<LsClientWeb_LoginResponse> Login(LsClientWeb_LoginRequest request);
         Task<LsClientWeb_GetProductsResponse> GetProducts(LsClientWeb_GetProductsRequest request);
         Task<LsClientWeb_GetProductStatusResponse> GetProductStatus(LsClientWeb_GetProductStatusRequest request);
-        LsClientWeb_PublishCommandResponse PublishCommand(LsClientWeb_PublishCommandRequest request);
+        Task<LsClientWeb_PublishCommandResponse> PublishCommand(LsClientWeb_PublishCommandRequest request);
     }
 }

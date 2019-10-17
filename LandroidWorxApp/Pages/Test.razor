@@ -33,7 +33,7 @@
         var products = await LsClientWeb.GetProducts(new LsClientWeb_GetProductsRequest() { BearerToken = response.BearerToken, Username = "roberto.gualandris@hotmail.it" });
         var cmdInPath = products.Products.First().Topic.CmdIn;
         var cmdOutPath = products.Products.First().Topic.CmdOut;
-        var msgSent = LsClientWeb.PublishCommand(new LsClientWeb_PublishCommandRequest()
+        var msgSent = await LsClientWeb.PublishCommand(new LsClientWeb_PublishCommandRequest()
         {
             BearerToken = response.BearerToken,
             Broker = response.BrokerUrl,

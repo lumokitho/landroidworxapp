@@ -51,7 +51,7 @@ namespace LandroidWorxApp.Pages
                 new Claim(ClaimTypes.Name, username),
                 new Claim(ClaimTypes.Role, "Administrator"),
                 new Claim("BearerToken", response.BearerToken),
-                new Claim("BrokerUrl", response.BearerToken),
+                new Claim("BrokerUrl", response.BrokerUrl),
             };
             var claimsIdentity = new ClaimsIdentity(
                 claims, CookieAuthenticationDefaults.AuthenticationScheme);

@@ -1,6 +1,4 @@
-﻿
-
-window.interop = {
+﻿window.interop = {
     getElementByName: function (name) {
         var elements = document.getElementsByName(name);
         if (elements.length) {
@@ -28,12 +26,17 @@ window.interop = {
         form.submit();
     },
     renderPickers: function () {
-        $('.timepicker').timepicker({
-            minuteStep: 1,
-            showInputs: false,
-            template: false,
-            disableFocus: true,
-            showMeridian: false
+        $('.time-picker').AnyPicker({
+            onInit: function () {
+                apo = this;
+            },
+            onSetOutput: function () {              
+                var event = new Event('change');
+                this.elem.dispatchEvent(event);
+            },
+            mode: 'datetime',
+            dateTimeFormat: 'HH:mm',
+            lang: 'it',
         });
     },
     showSwallAlert: function (type, title, message, confirmBtnText, cancelBtnText, callback) {

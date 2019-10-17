@@ -126,10 +126,13 @@ namespace LandroidWorxApp.BusinessLogic
             return response;
         }
 
-        public LsClientWeb_PublishCommandResponse PublishCommand (LsClientWeb_PublishCommandRequest request)
+        public async Task<LsClientWeb_PublishCommandResponse> PublishCommand (LsClientWeb_PublishCommandRequest request)
         {
             if(request.CertWX == null && !string.IsNullOrEmpty(request.BearerToken))
-                request.CertWX = GetMqttCertificate(request.BearerToken).GetAwaiter().GetResult().Item2;
+            {
+                var response = await GetMqttCertificate(request.BearerToken);
+                request.CertWX = response.Item2;
+            }
 
             MqttClient mqtt = new MqttClient(request.Broker, 8883, true, null, request.CertWX, MqttSslProtocols.TLSv1_2);
 
