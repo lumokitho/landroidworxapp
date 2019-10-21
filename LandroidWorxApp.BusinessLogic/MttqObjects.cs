@@ -104,7 +104,7 @@ namespace LandroidWorxApp.BusinessLogic
     [DataContract]
     public struct Config
     {
-        [DataMember(Name = "lg")] public string Language; // always it :-(
+        [DataMember(Name = "lg")] public string Language; 
         [DataMember(Name = "tm")] public string Time;
         [DataMember(Name = "dt")] public string Date;
         [DataMember(Name = "sc")] public Schedule Schedule;
