@@ -95,6 +95,8 @@
 <Row Class="mt-2">
     <Column>
         <Button Color="Color.Info" Clicked="@AddTimeSchedule">Add Time</Button>
+    </Column>
+    <Column Class="text-right">
         <Button Color="Color.Success" Clicked="@OnButtonClicked">Save Scheduler</Button>
     </Column>
 </Row>
@@ -127,6 +129,7 @@
     LandroidWorxApp.BusinessLogic.Config config = new LandroidWorxApp.BusinessLogic.Config();
     List<TimePlanning_BL> Plannings = new List<TimePlanning_BL>();
     TimeSchedule test;
+    Interop interop;
 
     string bearerToken = string.Empty;
     string serialNumber = string.Empty;
@@ -141,6 +144,7 @@
         broker = user.Claims.First(c => c.Type == "BrokerUrl").Value;
         username = user.Identity.Name;
         serialNumber = user.Claims.FirstOrDefault(c => c.Type == "SelectedProductSN")?.Value;
+        interop = new Interop(JSRuntime);
         if (string.IsNullOrWhiteSpace(serialNumber))
         {
             NavigationManager.NavigateTo("products");
@@ -148,19 +152,19 @@
         }
 
 
-        await GetTimePannings();
+        GetTimePannings();
         await GetData();
 
     }
 
-    public async Task GetData()
+    private async Task GetData()
     {
         var status = await LsClientWeb.GetProductStatus(new LsClientWeb_GetProductStatusRequest() { BearerToken = bearerToken, SerianNumber = serialNumber });
         data = status.Status.Dat;
         config = status.Status.Cfg;
     }
 
-    public async Task GetTimePannings()
+    private void GetTimePannings()
     {
         var response = Manager.GetTimePlannings(new GetTimePlanningsRequest() { Username = "roberto.gualandris@hotmail.it" });
         Plannings = response.Plannings;
@@ -177,14 +181,16 @@
             await interop.ShowSwallAlert("warning", "Attention", "Duration can not be equal or less then 0", "OK", null, null);
             return;
         }
-        Manager.SaveTimePlanningsRequest(new SaveTimePlanningsRequest() { Plannings = Plannings, SerialNumber = serialNumber, WorkPercentage = config.Schedule.Perc });
+        Manager.SaveTimePlanningsRequest(new SaveTimePlanningsRequest() { Username = username, Plannings = Plannings, SerialNumber = serialNumber, WorkPercentage = config.Schedule.Perc });
         await interop.Overlay(false);
         await interop.ShowSwallAlert("success", "Save Scheduler", "Scheduler saved", "OK", null, null);
     }
 
-    public void AddTimeSchedule()
+    public async Task AddTimeSchedule()
     {
         Plannings.Add(new TimePlanning_BL() { DayOfWeek = selectedTab, Username = "roberto.gualandris@hotmail.it", });
+        await Task.Delay(500);
+        await interop.RenderPickers("time-picker");
     }
 
     public void DeleteTimeSchedule(TimePlanning_BL time)

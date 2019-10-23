@@ -9,31 +9,34 @@
 @inject NavigationManager NavigationManager
 @inject ILsClientWeb LsClientWeb
 
-@if (zones != null)
-{
-    <Row>
-        @for (int i = 0; i < zones.Count; i++)
+
+<Row>
+    @foreach (var item in zones)
+    {
+        if (item > 0)
         {
-            int zoneN = i;
+            int zone = item;
             <Column ColumnSize="ColumnSize.Is4.Is3.OnDesktop">
                 <Field>
-                    <FieldLabel><b>Zone @zoneN</b></FieldLabel>
-                    <NumericEdit TValue="int" @bind-Value="zones[i]" />
+                    <FieldLabel><b>Zone @(zones.IndexOf(item) + 1)</b></FieldLabel>
+                    <NumericEdit TValue="int" @bind-Value="zones[zones.IndexOf(item)]" />
                 </Field>
             </Column>
         }
-    </Row>
 
-    <Row Class="mt-2">
-        <Column>
-            <Button Color="Color.Info" Clicked="@AddZone">Add Zone</Button>
-            <Button Color="Color.Danger" Clicked="@DeleteZone">Delete Zone</Button>
-        </Column>
-        <Column Class="text-right">
-            <Button Color="Color.Success" Clicked="@SaveZones">Save Zones</Button>
-        </Column>
-    </Row>
-}
+    }
+</Row>
+
+
+<Row Class="mt-3">
+    <Column>
+        <Button Color="Color.Info" Clicked="@AddZone">Add Zone</Button>
+        <Button Color="Color.Danger" Clicked="@DeleteZone">Delete Zone</Button>
+    </Column>
+    <Column Class="text-right">
+        <Button Color="Color.Success" Clicked="@SaveZones">Save Zones</Button>
+    </Column>
+</Row>
 
 @code {
     [CascadingParameter]
@@ -41,13 +44,13 @@
 
     ClaimsPrincipal user;
     Interop interop;
-    string bearerToken;
-    string serialNumber;
+    string bearerToken = string.Empty;
+    string serialNumber = string.Empty;
     string broker = string.Empty;
     string cmdInPath = string.Empty;
     string cmdOutPath = string.Empty;
 
-    List<int> zones;
+    List<int> zones = new List<int>();
 
     protected override async Task OnInitializedAsync()
     {
@@ -78,15 +81,15 @@
     {
         await interop.Overlay(true);
         var status = await LsClientWeb.GetProductStatus(new LsClientWeb_GetProductStatusRequest() { BearerToken = bearerToken, SerianNumber = serialNumber });
-        zones = status.Status.Cfg.MultiZones?.ToList();
-
+        zones = status.Status.Cfg.MultiZones?.Where(z => z > 0).ToList();
+        StateHasChanged();
         await interop.Overlay(false);
     }
 
     private void AddZone()
     {
         if (zones.Count < 4)
-            zones.Add(0);
+            zones.Add(1);
     }
 
     private void DeleteZone()
@@ -119,6 +122,7 @@
         {
             StateHasChanged();
             await interop.Overlay(false);
+            await interop.ShowSwallAlert("success", "Save Zones", "Zones saved", "OK", null, null);
         });
     }
 }

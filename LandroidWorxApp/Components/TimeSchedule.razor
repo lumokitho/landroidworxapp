@@ -14,17 +14,17 @@
             <NumericEdit TValue="int" @bind-Value="Planning.Duration" />
         </Field>
     </Column>
-    @if (Config.MultiZones != null && Config.MultiZones.Count() > 0)
+    @if (Config.MultiZones != null && Config.MultiZones.Any(z => z > 0))
     {
         <Column ColumnSize="ColumnSize.Is4.Is3.OnDesktop">
             <Field>
                 <FieldLabel><b>Zone</b></FieldLabel>
-                <SelectEdit TValue="int" @bind-SelectedValue="Planning.Zone">
+                <SelectEdit TValue="int?" @bind-SelectedValue="Planning.Zone">
                     @foreach (var item in Config.MultiZones)
                     {
                         if (item > 0)
                         {
-                            <SelectItem Value="Config.MultiZones.ToList().IndexOf(item)">@(Config.MultiZones.ToList().IndexOf(item) + 1)</SelectItem>
+                            <SelectItem Value="(int?)(Config.MultiZones.ToList().IndexOf(item))">@(Config.MultiZones.ToList().IndexOf(item) + 1)</SelectItem>
                         }
                     }
                 </SelectEdit>

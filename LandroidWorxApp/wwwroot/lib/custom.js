@@ -25,19 +25,21 @@
         document.body.appendChild(form);
         form.submit();
     },
-    renderPickers: function () {
-        $('.time-picker').AnyPicker({
-            onInit: function () {
-                apo = this;
-            },
-            onSetOutput: function () {              
-                var event = new Event('change');
-                this.elem.dispatchEvent(event);
-            },
-            mode: 'datetime',
-            dateTimeFormat: 'HH:mm',
-            lang: 'it',
-        });
+    renderPickers: function (className) {
+        if ($('.' + className).length > 0) {
+            $('.' + className).AnyPicker({
+                onInit: function () {
+                    apo = this;
+                },
+                onSetOutput: function () {
+                    var event = new Event('change');
+                    this.elem.dispatchEvent(event);
+                },
+                mode: 'datetime',
+                dateTimeFormat: 'HH:mm',
+                lang: 'it',
+            });
+        }       
     },
     showSwallAlert: function (type, title, message, confirmBtnText, cancelBtnText, callback) {
         debugger

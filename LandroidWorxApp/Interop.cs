@@ -67,5 +67,18 @@ namespace LandroidWorxApp
             {
             }
         }
+
+        public async Task RenderPickers(string className)
+        {
+            try
+            {
+                await _jsRuntime.InvokeVoidAsync(
+                    "interop.renderPickers",
+                    className);
+            }
+            catch
+            {
+            }
+        }
     }
 }

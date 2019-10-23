@@ -41,7 +41,7 @@ namespace LandroidWorxApp.BusinessLogic
         public SaveTimePlanningsResponse SaveTimePlanningsRequest(SaveTimePlanningsRequest request)
         {
             // Get old time plannings of user and remove all with recurring jobs 
-            var oldPlannings = _repoManager.GenericOperations.GetByExpression<TimePlanning>(p => p.Username == request.Plannings.First().Username);
+            var oldPlannings = _repoManager.GenericOperations.GetByExpression<TimePlanning>(p => p.Username == request.Username);
             oldPlannings.ForEach(p => { RecurringJob.RemoveIfExists(p.Id.ToString()); });
             _repoManager.GenericOperations.DeleteAll(oldPlannings);
 
