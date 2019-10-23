@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using LandroidWorxApp.BusinessLogic;
@@ -36,15 +37,25 @@ namespace LandroidWorxApp.Pages
             }
             catch { }
 
-
-            var response = await _lsClientWeb.Login(new LsClientWeb_LoginRequest()
+            LsClientWeb_LoginResponse response = new LsClientWeb_LoginResponse();
+           
+            try
             {
-                ClientSecret = _configuration.GetValue<string>("ClientSecret"),
-                GrantType = "password",
-                Scope = "*",
-                Username = username,
-                Password = password
-            });
+                response = await _lsClientWeb.Login(new LsClientWeb_LoginRequest()
+                {
+                    ClientSecret = _configuration.GetValue<string>("ClientSecret"),
+                    GrantType = "password",
+                    Scope = "*",
+                    Username = username,
+                    Password = password
+                });
+            }
+            catch (WebException ex)
+            {
+                if((ex.Response as HttpWebResponse).StatusCode == HttpStatusCode.Unauthorized)
+                    return LocalRedirect(Url.Content("~/login/invalidAuth"));
+            }
+
 
             var claims = new List<Claim>
             {
