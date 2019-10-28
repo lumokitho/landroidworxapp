@@ -110,21 +110,6 @@
     DayOfWeek selectedTab = DateTime.Now.DayOfWeek;
     TabsContent days;
 
-
-    private void OnSelectedTab(string tab)
-    {
-        selectedTab = (DayOfWeek)Enum.Parse(typeof(DayOfWeek), tab);
-        days.SelectPanel(tab);
-    }
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
-            await JSRuntime.InvokeAsync<object>("interop.renderPickers");
-    }
-
-
-
     Data data = new Data();
     LandroidWorxApp.BusinessLogic.Config config = new LandroidWorxApp.BusinessLogic.Config();
     List<TimePlanning_BL> Plannings = new List<TimePlanning_BL>();
@@ -155,6 +140,18 @@
         GetTimePannings();
         await GetData();
 
+    }
+
+        private void OnSelectedTab(string tab)
+    {
+        selectedTab = (DayOfWeek)Enum.Parse(typeof(DayOfWeek), tab);
+        days.SelectPanel(tab);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+            await interop.RenderPickers("time-picker");
     }
 
     private async Task GetData()

@@ -12,7 +12,7 @@
     @foreach (var item in products)
     {
         string pinCode = item.Pin;
-        <Column ColumnSize="ColumnSize.Is6.OnMobile.Is4.OnTablet.Is3.OnDesktop">
+        <Column ColumnSize="ColumnSize.Is6.OnTablet.Is4.OnFullHD">
             <div class="product text-center p-3" @onclick="() => SelectProduct(item)">
                 <img src="/img/landroid.png" alt="@item.Name" />
                 <h2>@item.Name</h2>
