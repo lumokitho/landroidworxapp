@@ -1,4 +1,6 @@
 ﻿@page "/"
+@attribute [Authorize]
+
 @using LandroidWorxApp.BusinessLogic
 @using Microsoft.Extensions.Configuration
 @using System.Globalization
@@ -6,38 +8,41 @@
 @using uPLibrary.Networking.M2Mqtt.Messages;
 @inject ILsClientWeb LsClientWeb
 @inject IConfiguration Configuration
-
+@inject IJSRuntime JSRuntime
+@inject NavigationManager NavigationManager
 
 <div class="row">
-    <div class="col-3 align-self-center battery">
+    <div class="col align-self-center battery">
         <i class="fas fa-battery-@batteryStatus" style="font-size:2em;color:#cc5f28"></i> <span style="vertical-align:super">@data.Battery.Perc%</span>
         <br />
         <span class="info">@(data.Battery.Volt)V @(data.Battery.Temp)°</span>
     </div>
     <div class="col align-self-center status text-center">
         <div><b>@data.LastState</b></div>
-        <div><span class="info"><b>Next working hours:&nbsp;</b>@config.NextWorkingHours</span></div>
     </div>
-    <div class="col-3 align-self-center text-right wifi">
+    <div class="col align-self-center text-right wifi">
         <i class="fas fa-wifi" style="font-size:2em;color:#cc5f28"></i>
         <br />
         <span class="info">@data.RecvSignal dB</span>
     </div>
 </div>
 
-<div class="row mt-5">
-    <div class="col align-self-center text-right">
-        <span class="info">Slope: @data.Orient[0]°</span>
+<div class="mt-3 text-center"><span class="info"><b>Next working hours:&nbsp;</b>@config.NextWorkingHours</span></div>
+<div class="mt-5 text-center status"><b>@productName</b></div>
+
+<div class="row mt-1">
+    <div class="col align-self-center text-center text-sm-right">
+        <span class="info">Slope: @data.Orient?[0]°</span>
     </div>
-    <div class="col-auto text-center landroid">
+    <div class="col col-sm-auto text-center landroid">
         <img src="/img/landroid.png" alt="Robertino Robottino" />
     </div>
-    <div class="col align-self-center">
-        <span class="info">Direction: @data.Orient[2]°</span>
+    <div class="col align-self-center text-center text-sm-left">
+        <span class="info">Direction: @data.Orient?[2]°</span>
     </div>
 </div>
 <div class="text-center">
-    <span class="info">Roll: @data.Orient[1]°</span>
+    <span class="info">Roll: @data.Orient?[1]°</span>
 </div>
 
 
@@ -89,60 +94,71 @@
     <span class="info">FW: @data.Firmware</span>
 </div>
 
-<div class="row justify-content-center mt-3">
-    <div class="col-auto">
+<div class="row justify-content-center mt-3 main-buttons">
+    <div class="col-6 col-sm-auto text-center py-2">
         <button class="btn btn-primary" @onclick="Start"><i class="fas fa-play"></i> Start</button>
     </div>
-    <div class="col-auto">
+    <div class="col-6 col-sm-auto text-center py-2">
         <button class="btn btn-danger" @onclick="Stop"><i class="fas fa-square"></i> Stop</button>
     </div>
-    <div class="col-auto">
+    <div class="col-6 col-sm-auto text-center py-2">
         <button class="btn btn-success" @onclick="GoHome"><i class="fas fa-home"></i> Home</button>
     </div>
-    <div class="col-auto">
+    <div class="col-6 col-sm-auto text-center py-2">
         <button class="btn btn-secondary" @onclick="GetData"><i class="fas fa-redo-alt"></i> Poll</button>
     </div>
 </div>
 
 @code{
+
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationStateTask { get; set; }
+
     Data data = new Data();
-    LandroidWorxApp.BusinessLogic.Config config = new LandroidWorxApp.BusinessLogic.Config();
+    LandroidWorxApp.BusinessLogic.Config config = new LandroidWorxApp.BusinessLogic.Config() { Schedule = new Schedule() };
     string nextZone = string.Empty;
     string batteryStatus = "empty";
     string bearerToken = string.Empty;
+    string username = string.Empty;
     string serialNumber = string.Empty;
     string broker = string.Empty;
     string cmdInPath = string.Empty;
     string cmdOutPath = string.Empty;
+    string productName = string.Empty;
+    Interop interop;
 
-    protected override async Task OnInitializedAsync ()
+    protected override async Task OnInitializedAsync()
     {
-        await Setup();
-        await GetData();
+        var authState = await authenticationStateTask;
+        var user = authState.User;
+        bearerToken = user.Claims.First(c => c.Type == "BearerToken").Value;
+        broker = user.Claims.First(c => c.Type == "BrokerUrl").Value;
+        username = user.Identity.Name;
+        serialNumber = user.Claims.FirstOrDefault(c => c.Type == "SelectedProductSN")?.Value;
+        cmdInPath = user.Claims.FirstOrDefault(c => c.Type == "CmdInPath")?.Value;
+        cmdOutPath = user.Claims.FirstOrDefault(c => c.Type == "CmdOutPath")?.Value;
+        productName =  user.Claims.FirstOrDefault(c => c.Type == "SelectedProductName")?.Value;
+        interop = new Interop(JSRuntime);
+
+        if (string.IsNullOrWhiteSpace(serialNumber))
+            NavigationManager.NavigateTo("products");
     }
 
-    public async Task Setup()
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        var response = LsClientWeb.Login(new LsClientWeb_LoginRequest()
+        if (firstRender)
         {
-            ClientSecret = Configuration.GetValue<string>("ClientSecret"),
-            GrantType = "password",
-            Scope = "*",
-            Username = "roberto.gualandris@hotmail.it",
-            Password = "ilguala11"
-        });
-
-        var products = LsClientWeb.GetProducts(new LsClientWeb_GetProductsRequest() { BearerToken = response.BearerToken, Username = "roberto.gualandris@hotmail.it"  });
-        bearerToken = response.BearerToken;
-        broker = response.BrokerUrl;
-        serialNumber = products.Products.First().SerialNo;
-        cmdInPath = products.Products.First().Topic.CmdIn;
-        cmdOutPath = products.Products.First().Topic.CmdOut;
+            await interop.Overlay(true);
+            await GetData();
+            StateHasChanged();
+            await interop.Overlay(false);
+        }
     }
 
     public async Task GetData()
     {
-        var status = LsClientWeb.GetProductStatus(new LsClientWeb_GetProductStatusRequest() { BearerToken = bearerToken, SerianNumber = serialNumber });
+        await interop.Overlay(true);
+        var status = await LsClientWeb.GetProductStatus(new LsClientWeb_GetProductStatusRequest() { BearerToken = bearerToken, SerianNumber = serialNumber });
         data = status.Status.Dat;
         config = status.Status.Cfg;
         if (data.Battery.Perc > 90)
@@ -157,11 +173,13 @@
             batteryStatus = "empty";
 
         nextZone = config.MultiZones[0] > 0 ? (config.MultiZonePercs[data.LastZone] + 1).ToString() : "-";
+        await interop.Overlay(false);
     }
 
     public async Task Start()
     {
-        var response = LsClientWeb.PublishCommand(new LsClientWeb_PublishCommandRequest()
+        await interop.Overlay(true);
+        var response = await LsClientWeb.PublishCommand(new LsClientWeb_PublishCommandRequest()
         {
             BearerToken = bearerToken,
             Broker = broker,
@@ -175,7 +193,8 @@
 
     public async Task Stop()
     {
-        var response = LsClientWeb.PublishCommand(new LsClientWeb_PublishCommandRequest()
+        await interop.Overlay(true);
+        var response = await LsClientWeb.PublishCommand(new LsClientWeb_PublishCommandRequest()
         {
             BearerToken = bearerToken,
             Broker = broker,
@@ -189,7 +208,8 @@
 
     public async Task GoHome()
     {
-        var response = LsClientWeb.PublishCommand(new LsClientWeb_PublishCommandRequest()
+        await interop.Overlay(true);
+        var response = await LsClientWeb.PublishCommand(new LsClientWeb_PublishCommandRequest()
         {
             BearerToken = bearerToken,
             Broker = broker,
@@ -205,10 +225,11 @@
     {
         ((MqttClient)sender).Disconnect();
 
-        InvokeAsync(() =>
+        InvokeAsync(async () =>
         {
-            GetData();
+            await GetData();
             StateHasChanged();
+            await interop.Overlay(false);
         });
     }
 }

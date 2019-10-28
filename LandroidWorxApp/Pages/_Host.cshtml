@@ -12,17 +12,38 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.4.1/css/all.css">
     <link rel="stylesheet" href="~/lib/bootstrap-timepicker/css/bootstrap-timepicker.min.css" />
+    <link href="_content/Blazorise/blazorise.css" rel="stylesheet" />
+    <link href="_content/Blazorise.Bootstrap/blazorise.bootstrap.css" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/npm/anypicker@latest/dist/anypicker-all.min.css" />
     <link rel="stylesheet" href="css/site.css" />
 </head>
 <body>
-    <app>@(await Html.RenderComponentAsync<App>(RenderMode.Server))</app>
+    <!--Overlay-->
+    <div id="overlay" style="display: none;">
+        <div class="span position-relative h-100">
+            <div class="row w-100 position-absolute">
+                <div class="timer"></div>
+                <div class="overlay-delete">
+                    <a href="javascript:interop.hideOverlay();" style="color: #999999;font-size: 20px;">Annulla</a>
+                </div>
+            </div>
 
+        </div>
+    </div>
+
+    <app>@(await Html.RenderComponentAsync<App>(RenderMode.Server))</app>
+    @(Html.AntiForgeryToken())
     <script src="_framework/blazor.server.js"></script>
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <script src="_content/Blazorise/blazorise.js"></script>
+    <script src="_content/Blazorise.Bootstrap/blazorise.bootstrap.js"></script>
+    <script src="~/lib/sweetalert/sweetalert.min.js"></script>
     <script src="~/lib/bootstrap-timepicker/js/bootstrap-timepicker.min.js"></script>
+    <script type="text/javascript" src="//cdn.jsdelivr.net/npm/anypicker@latest/dist/anypicker.min.js"></script>
+    <script type="text/javascript" src="//cdn.jsdelivr.net/npm/anypicker@latest/dist/i18n/anypicker-i18n.js"></script>
     <script src="~/lib/custom.js"></script>
 </body>
 </html>

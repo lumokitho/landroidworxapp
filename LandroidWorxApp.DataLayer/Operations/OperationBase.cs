@@ -37,7 +37,9 @@ namespace LandroidWorxApp.DataLayer.Operations
 
                 using (var db = GetDBInstance(connString))
                 {
-                    return db.Queryable<T>().ToList();
+                    var response = db.Queryable<T>().ToList();
+                    db.Close();
+                    return response;
                 }
             }
             catch (Exception ex)
@@ -55,7 +57,9 @@ namespace LandroidWorxApp.DataLayer.Operations
 
                 using (var db = GetDBInstance(connString))
                 {
-                    return db.Queryable<T>().Where(predicate).ToList();
+                    var response = db.Queryable<T>().Where(predicate).ToList();
+                    db.Close();
+                    return response;
                 }
             }
             catch (Exception ex)
@@ -73,7 +77,9 @@ namespace LandroidWorxApp.DataLayer.Operations
 
                 using (var db = GetDBInstance(connString))
                 {
-                    return db.Queryable<T>().Single(predicate);
+                    var response = db.Queryable<T>().Single(predicate);
+                    db.Close();
+                    return response;
                 }
             }
             catch (Exception ex)
@@ -91,6 +97,7 @@ namespace LandroidWorxApp.DataLayer.Operations
                 using (var db = GetDBInstance(connString))
                 {
                     db.Updateable<T>(element).ExecuteCommand();
+                    db.Close();
                 }
             }
             catch (Exception ex)
@@ -108,6 +115,7 @@ namespace LandroidWorxApp.DataLayer.Operations
                 using (var db = GetDBInstance(connString))
                 {
                     db.Updateable<T>().SetColumns(updateFields).Where(where).ExecuteCommand();
+                    db.Close();
                 }
             }
             catch (Exception ex)
@@ -125,6 +133,7 @@ namespace LandroidWorxApp.DataLayer.Operations
                 using (var db = GetDBInstance(connString))
                 {
                     db.Updateable(updateFields).Where(where).IgnoreColumns(ignoreAllNullColumns: true).ExecuteCommand();
+                    db.Close();
                 }
             }
             catch (Exception ex)
@@ -141,7 +150,9 @@ namespace LandroidWorxApp.DataLayer.Operations
 
                 using (var db = GetDBInstance(connString))
                 {
-                    return db.Insertable(element).ExecuteReturnIdentity();
+                    var response = db.Insertable(element).ExecuteReturnIdentity();
+                    db.Close();
+                    return response;
                 }
             }
             catch (Exception ex)
@@ -159,6 +170,7 @@ namespace LandroidWorxApp.DataLayer.Operations
                 using (var db = GetDBInstance(connString))
                 {
                     db.Insertable(elements).ExecuteCommand();
+                    db.Close();
                 }
             }
             catch (Exception ex)
@@ -175,7 +187,9 @@ namespace LandroidWorxApp.DataLayer.Operations
 
                 using (var db = GetDBInstance(connString))
                 {
-                    return db.Saveable(element).ExecuteReturnEntity();
+                    var response = db.Saveable(element).ExecuteReturnEntity();
+                    db.Close();
+                    return response;
                 }
             }
             catch (Exception ex)
@@ -192,7 +206,9 @@ namespace LandroidWorxApp.DataLayer.Operations
 
                 using (var db = GetDBInstance(connString))
                 {
-                    return db.Saveable(elements).ExecuteReturnList();
+                    var response = db.Saveable(elements).ExecuteReturnList();
+                    db.Close();
+                    return response;
                 }
             }
             catch (Exception ex)
@@ -210,6 +226,7 @@ namespace LandroidWorxApp.DataLayer.Operations
                 using (var db = GetDBInstance(connString))
                 {
                     db.Deleteable<T>().Where(predicate).ExecuteCommand();
+                    db.Close();
                 }
             }
             catch (Exception ex)
@@ -227,6 +244,7 @@ namespace LandroidWorxApp.DataLayer.Operations
                 using (var db = GetDBInstance(connString))
                 {
                     db.Deleteable<T>(element).ExecuteCommand();
+                    db.Close();
                 }
             }
             catch (Exception ex)
@@ -244,6 +262,7 @@ namespace LandroidWorxApp.DataLayer.Operations
                 using (var db = GetDBInstance(connString))
                 {
                     db.Deleteable<T>(elements).ExecuteCommand();
+                    db.Close();
                 }
             }
             catch (Exception ex)
@@ -260,7 +279,9 @@ namespace LandroidWorxApp.DataLayer.Operations
 
                 using (var db = GetDBInstance(connString))
                 {
-                    return db.Ado.UseStoredProcedure().GetDataTable(storedProcedureName, parameters);
+                    var response = db.Ado.UseStoredProcedure().GetDataTable(storedProcedureName, parameters);
+                    db.Close();
+                    return response;
                 }
             }
             catch (Exception ex)

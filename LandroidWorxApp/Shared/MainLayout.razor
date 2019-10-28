@@ -1,6 +1,5 @@
 ﻿@inherits LayoutComponentBase
-
-<EmbeddedContent BaseType="@(typeof(Tab))" />
+@inject NavigationManager NavigationManager
 
 <div class="sidebar">
     <NavMenu />
@@ -8,7 +7,12 @@
 
 <div class="main">
     <div class="top-row px-4">
-        <a href="https://docs.microsoft.com/en-us/aspnet/" target="_blank">About</a>
+        <AuthorizeView>
+            <Authorized>
+                Hello, @context.User.Identity.Name!
+                <a class="btn btn-danger" href="logoutaction">Log out</a>
+            </Authorized>
+        </AuthorizeView>
     </div>
 
     <div class="content px-4">
@@ -16,4 +20,17 @@
     </div>
 </div>
 
+@code{
+
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationStateTask { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await authenticationStateTask;
+        var user = authState.User;
+        if(!user.Identity.IsAuthenticated)
+            NavigationManager.NavigateTo("login");
+    }
+}
 

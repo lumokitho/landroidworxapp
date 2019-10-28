@@ -67,6 +67,8 @@ namespace LandroidWorxApp.BusinessLogic
         public bool AutoUpgd;
         [DataMember(Name = "mqtt_topics")]
         public LsMqttTopic Topic;
+        [DataMember(Name = "pin_code")]
+        public string Pin;
     }
     [DataContract]
     public struct LsMqtt

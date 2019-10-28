@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace LandroidWorxApp.BusinessLogic
 {
@@ -9,6 +10,6 @@ namespace LandroidWorxApp.BusinessLogic
     {
         GetTimePlanningsResponse GetTimePlannings(GetTimePlanningsRequest request);
         SaveTimePlanningsResponse SaveTimePlanningsRequest(SaveTimePlanningsRequest request);
-        void SetTimeCommand(SendTimePlanCommandRequest time);
+        Task SetTimeCommand(SendTimePlanCommandRequest time);
     }
 }

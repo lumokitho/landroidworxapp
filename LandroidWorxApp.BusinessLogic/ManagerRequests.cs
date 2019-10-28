@@ -15,8 +15,10 @@ namespace LandroidWorxApp.BusinessLogic
 
     public class SaveTimePlanningsRequest
     {
+        public string Username { get; set; }
         public string SerialNumber { get; set; }
         public List<TimePlanning_BL> Plannings { get; set; }
+        public int WorkPercentage { get; set; }
     }
     public class SaveTimePlanningsResponse
     {
@@ -27,7 +29,6 @@ namespace LandroidWorxApp.BusinessLogic
     {
         public TimePlanning_BL Planning { get; set; }
         public string SerialNumber { get; set; }
-        public string FunctionUrl { get; set; }
-        public string FunctionKey { get; set; }
+        public int WorkPercentage { get; set; }
     }
 }

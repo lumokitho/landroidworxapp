@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using LandroidWorxApp.Data;
 using LandroidWorxApp.BusinessLogic;
 using Hangfire;
 using Hangfire.SqlServer;
@@ -13,6 +12,11 @@ using Hangfire.Dashboard;
 using Blazorise;
 using Blazorise.Icons.FontAwesome;
 using Blazorise.Bootstrap;
+using Microsoft.AspNetCore.Components.Authorization;
+using LandroidWorxApp.AuthProvider;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using System.Net.Http;
 
 namespace LandroidWorxApp
 {
@@ -31,12 +35,11 @@ namespace LandroidWorxApp
         {
             services.AddRazorPages();
             services.AddServerSideBlazor();
-            services.AddSingleton<WeatherForecastService>();
             services.AddSingleton<ILsClientWeb>(x => new LsClientWeb(Configuration, "LandroidWorxAppData"));
             services.AddSingleton<IManager>(x => new Manager(Configuration, "LandroidWorxAppData"));
             services.AddBlazorise(options =>
              {
-                 options.ChangeTextOnKeyPress = true; // optional
+                 options.ChangeTextOnKeyPress = false; // optional
              });
             services.AddFontAwesomeIcons();
             services.AddBootstrapProviders();
@@ -57,9 +60,28 @@ namespace LandroidWorxApp
                 }));
 
             // Add the processing server as IHostedService
+#if !DEBUG
             services.AddHangfireServer();
+#endif
 
             services.AddServerSideBlazor().AddCircuitOptions(options => { options.DetailedErrors = true; });
+
+            // Add auth provider service
+            services.Configure<CookiePolicyOptions>(options =>
+            {
+                options.CheckConsentNeeded = context => true;
+                options.MinimumSameSitePolicy = SameSiteMode.Lax;
+            });
+            services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie(options =>
+            {
+                options.LoginPath = new PathString("/Login");
+                options.ExpireTimeSpan = TimeSpan.FromDays(1);
+                options.SlidingExpiration = true;
+            });
+            services.AddHttpContextAccessor();
+            services.AddScoped<HttpContextAccessor>();
+            services.AddHttpClient();
+            services.AddScoped<HttpClient>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -76,17 +98,23 @@ namespace LandroidWorxApp
                 app.UseHsts();
             }
 
+            app.UseHangfireDashboard("/hangfire", new DashboardOptions() { Authorization = new[] { new HangFireAuthorizationFilter() } });
             app.UseHttpsRedirection();
             app.UseStaticFiles();
+            app.UseCookiePolicy();
+            app.UseAuthentication();
             app.UseRouting();
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapBlazorHub();
                 endpoints.MapFallbackToPage("/_Host");
+                endpoints.MapDefaultControllerRoute();
             });
-            app.UseHangfireDashboard(options: new DashboardOptions() { Authorization = new[] { new HangFireAuthorizationFilter() } });
+
 
             app.ApplicationServices.UseBootstrapProviders().UseFontAwesomeIcons();
+
+
         }
     }
 

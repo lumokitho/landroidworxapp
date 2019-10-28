@@ -111,37 +111,9 @@ app {
     color: red;
 }
 
-@media (max-width: 767.98px) {
-    .main .top-row {
-        display: none;
-    }
-}
 
-@media (min-width: 768px) {
-    app {
-        flex-direction: row;
-    }
-
-    .sidebar {
-        width: 250px;
-        height: 100vh;
-        position: sticky;
-        top: 0;
-    }
-
-    .main .top-row {
-        position: sticky;
-        top: 0;
-    }
-
-    .navbar-toggler {
-        display: none;
-    }
-
-    .sidebar .collapse {
-        /* Never collapse the sidebar for wide screens */
-        display: block;
-    }
+.main-buttons button {
+    width: 100px;
 }
 
 
@@ -185,4 +157,296 @@ span.info {
 .days {
     background-color: rgba(245,245,245,1);
     padding: 15px;
+}
+
+/* Set the overlay css */
+#overlay {
+    background: rgba(29, 47, 63,1);
+    position: fixed;
+    z-index: 99999;
+    width: 100%;
+    height: 100%;
+    left: 0px;
+    opacity: 0.94;
+}
+
+    #overlay .row.w-100 {
+        left: 50%;
+        top: 45%;
+    }
+
+/* Timer*/
+.timer {
+    width: 35px;
+    height: 35px;
+    background-color: transparent;
+    box-shadow: inset 0px 0px 0px 2px #fff;
+    border-radius: 50%;
+    position: absolute;
+}
+
+.overlay-delete {
+    position: fixed;
+    top: 50%;
+    width: 100%;
+    text-align: center;
+    left: 0;
+}
+
+.timer:after, .timer:before {
+    position: absolute;
+    content: "";
+    background-color: #fff;
+}
+
+.timer:after {
+    width: 10px;
+    height: 2px;
+    top: 50%;
+    left: 50%;
+    -webkit-transform-origin: 1px 1px;
+    -moz-transform-origin: 1px 1px;
+    transform-origin: 1px 1px;
+    -webkit-animation: minhand 2s linear infinite;
+    -moz-animation: minhand 2s linear infinite;
+    animation: minhand 2s linear infinite;
+}
+
+#overlay .row.w-100 {
+    left: 50%;
+    top: 45%;
+}
+
+.timer:before {
+    width: 8px;
+    height: 2px;
+    top: 50%;
+    left: 50%;
+    -webkit-transform-origin: 1px 1px;
+    -moz-transform-origin: 1px 1px;
+    transform-origin: 1px 1px;
+    -webkit-animation: hrhand 8s linear infinite;
+    -moz-animation: hrhand 8s linear infinite;
+    animation: hrhand 8s linear infinite;
+}
+
+.span.tracking-overlay .timer:before {
+    background-color: #D73B73;
+}
+
+.span.tracking-overlay .timer:after {
+    background-color: #D73B73;
+}
+
+.span.tracking-overlay .timer {
+    box-shadow: inset 0px 0px 0px 2px #D73B73;
+}
+
+@-webkit-keyframes minhand {
+    0% {
+        -webkit-transform: rotate(0deg)
+    }
+
+    100% {
+        -webkit-transform: rotate(360deg)
+    }
+}
+
+@-moz-keyframes minhand {
+    0% {
+        -moz-transform: rotate(0deg)
+    }
+
+    100% {
+        -moz-transform: rotate(360deg)
+    }
+}
+
+@keyframes minhand {
+    0% {
+        transform: rotate(0deg)
+    }
+
+    100% {
+        transform: rotate(360deg)
+    }
+}
+
+@-webkit-keyframes hrhand {
+    0% {
+        -webkit-transform: rotate(0deg)
+    }
+
+    100% {
+        -webkit-transform: rotate(360deg)
+    }
+}
+
+@-moz-keyframes hrhand {
+    0% {
+        -moz-transform: rotate(0deg)
+    }
+
+    100% {
+        -moz-transform: rotate(360deg)
+    }
+}
+
+@keyframes hrhand {
+    0% {
+        transform: rotate(0deg)
+    }
+
+    100% {
+        transform: rotate(360deg)
+    }
+}
+
+@-webkit-keyframes loading {
+    0% {
+        -webkit-transform: translateX(-30px);
+        opacity: 0
+    }
+
+    25% {
+        opacity: 1
+    }
+
+    50% {
+        -webkit-transform: translateX(30px);
+        opacity: 0
+    }
+
+    100% {
+        opacity: 0
+    }
+}
+
+@-moz-keyframes loading {
+    0% {
+        -moz-transform: translateX(-30px);
+        opacity: 0
+    }
+
+    25% {
+        opacity: 1
+    }
+
+    50% {
+        -moz-transform: translateX(30px);
+        opacity: 0
+    }
+
+    100% {
+        opacity: 0
+    }
+}
+
+@-o-keyframes loading {
+    0% {
+        -o-transform: translateX(-30px);
+        opacity: 0
+    }
+
+    25% {
+        opacity: 1
+    }
+
+    50% {
+        -o-transform: translateX(30px);
+        opacity: 0
+    }
+
+    100% {
+        opacity: 0
+    }
+}
+
+@-ms-keyframes loading {
+    0% {
+        -ms-transform: translateX(-30px);
+        opacity: 0
+    }
+
+    25% {
+        opacity: 1
+    }
+
+    50% {
+        -ms-transform: translateX(30px);
+        opacity: 0
+    }
+
+    100% {
+        opacity: 0
+    }
+}
+
+@keyframes loading {
+    0% {
+        -ms-transform: translateX(-30px);
+        opacity: 0
+    }
+
+    25% {
+        opacity: 1
+    }
+
+    50% {
+        -ms-transform: translateX(30px);
+        opacity: 0
+    }
+
+    100% {
+        opacity: 0
+    }
+}
+
+/* Products */
+.product {
+    cursor:pointer;
+    background-color: #fafafa;
+    border-radius: 5px;
+    box-shadow: 0 2px 3px rgba(10,10,10,.1), 0 0 0 1px rgba(10,10,10,.1);
+}
+
+.product img {
+    width:70%
+}
+
+.product input {
+    width: 50px;
+}
+
+@media (max-width: 767.98px) {
+    .main .top-row {
+        display: none;
+    }
+}
+
+@media (min-width: 768px) {
+    app {
+        flex-direction: row;
+    }
+
+    .sidebar {
+        width: 250px;
+        height: 100vh;
+        position: sticky;
+        top: 0;
+    }
+
+    .main .top-row {
+        position: sticky;
+        top: 0;
+    }
+
+    .navbar-toggler {
+        display: none;
+    }
+
+    .sidebar .collapse {
+        /* Never collapse the sidebar for wide screens */
+        display: block;
+    }
 }

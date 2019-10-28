@@ -1,4 +1,6 @@
 ﻿@page "/scheduler"
+@attribute [Authorize]
+
 @using System.Globalization
 @using LandroidWorxApp.BusinessLogic
 @using Microsoft.Extensions.Configuration
@@ -9,6 +11,7 @@
 @inject IManager Manager
 @inject IConfiguration Configuration
 @inject IJSRuntime JSRuntime
+@inject NavigationManager NavigationManager
 
 <Tabs SelectedTabChanged="OnSelectedTab" IsJustified="true" IsPills="true" Class="days mx-n4">
     <Tab Name="@DayOfWeek.Monday.ToString()" IsActive="selectedTab == DayOfWeek.Monday">@CultureInfo.CurrentCulture.DateTimeFormat.AbbreviatedDayNames[(int)DayOfWeek.Monday].ToUpper()</Tab>
@@ -76,38 +79,37 @@
 
 </TabsContent>
 
-<Row Class="mt-2">
+<Row Class="mt-3">
+    <Column ColumnSize="ColumnSize.Is1" Class="align-self-center text-center">
+        <span><b>@config.Schedule.Perc</b></span>
+    </Column>
     <Column>
-        <Button Color="Color.Info" Clicked="@AddTimeSchedule">Add Time</Button>
-        <Button Color="Color.Primary" Clicked="@OnButtonClicked">Save Scheduler</Button>
+        <Field>
+            <label for="work-percentage"><b>Work Percentage</b></label>
+            <input type="range" class="form-control-range" id="work-percentage" step="10" min="-100" max="100" @bind-value="config.Schedule.Perc" />
+        </Field>
     </Column>
 </Row>
 
 
-<Modal @ref="validationModal">
-    <ModalBackdrop />
-    <ModalContent IsCentered="true">
-        <ModalHeader>
-            <ModalTitle>Attention</ModalTitle>
-            <CloseButton Clicked="() => validationModal.Hide()" />
-        </ModalHeader>
-        <ModalBody>
-            @modalText;
-        </ModalBody>
-        <ModalFooter>
-            <Button Color="Color.Secondary" Clicked="() => validationModal.Hide()">Close</Button>
-        </ModalFooter>
-    </ModalContent>
-</Modal>
-
+<Row Class="mt-2">
+    <Column>
+        <Button Color="Color.Info" Clicked="@AddTimeSchedule">Add Time</Button>
+    </Column>
+    <Column Class="text-right">
+        <Button Color="Color.Success" Clicked="@OnButtonClicked">Save Scheduler</Button>
+    </Column>
+</Row>
 
 @code
 {
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationStateTask { get; set; }
+
     TextEdit timeStart;
     DayOfWeek selectedTab = DateTime.Now.DayOfWeek;
     TabsContent days;
-    Modal validationModal;
-    string modalText;
+
 
     private void OnSelectedTab(string tab)
     {
@@ -118,7 +120,7 @@
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
-            await JSRuntime.InvokeAsync<object>("renderPickers");
+            await JSRuntime.InvokeAsync<object>("interop.renderPickers");
     }
 
 
@@ -127,85 +129,68 @@
     LandroidWorxApp.BusinessLogic.Config config = new LandroidWorxApp.BusinessLogic.Config();
     List<TimePlanning_BL> Plannings = new List<TimePlanning_BL>();
     TimeSchedule test;
-    string nextZone = string.Empty;
-    string batteryStatus = "empty";
+    Interop interop;
+
     string bearerToken = string.Empty;
     string serialNumber = string.Empty;
     string broker = string.Empty;
-    string cmdInPath = string.Empty;
-    string cmdOutPath = string.Empty;
+    string username = string.Empty;
 
     protected override async Task OnInitializedAsync()
     {
-        await Setup();
-        await GetTimePannings();
+        var authState = await authenticationStateTask;
+        var user = authState.User;
+        bearerToken = user.Claims.First(c => c.Type == "BearerToken").Value;
+        broker = user.Claims.First(c => c.Type == "BrokerUrl").Value;
+        username = user.Identity.Name;
+        serialNumber = user.Claims.FirstOrDefault(c => c.Type == "SelectedProductSN")?.Value;
+        interop = new Interop(JSRuntime);
+        if (string.IsNullOrWhiteSpace(serialNumber))
+        {
+            NavigationManager.NavigateTo("products");
+            return;
+        }
+
+
+        GetTimePannings();
         await GetData();
 
     }
 
-    public async Task Setup()
+    private async Task GetData()
     {
-        var response = LsClientWeb.Login(new LsClientWeb_LoginRequest()
-        {
-            ClientSecret = Configuration.GetValue<string>("ClientSecret"),
-            GrantType = "password",
-            Scope = "*",
-            Username = "roberto.gualandris@hotmail.it",
-            Password = "ilguala11"
-        });
-
-        var products = LsClientWeb.GetProducts(new LsClientWeb_GetProductsRequest() { BearerToken = response.BearerToken, Username ="roberto.gualandris@hotmail.it" });
-        bearerToken = response.BearerToken;
-        broker = response.BrokerUrl;
-        serialNumber = products.Products.First().SerialNo;
-        cmdInPath = products.Products.First().Topic.CmdIn;
-        cmdOutPath = products.Products.First().Topic.CmdOut;
-    }
-
-    public async Task GetData()
-    {
-        var status = LsClientWeb.GetProductStatus(new LsClientWeb_GetProductStatusRequest() { BearerToken = bearerToken, SerianNumber = serialNumber });
+        var status = await LsClientWeb.GetProductStatus(new LsClientWeb_GetProductStatusRequest() { BearerToken = bearerToken, SerianNumber = serialNumber });
         data = status.Status.Dat;
         config = status.Status.Cfg;
-        if (data.Battery.Perc > 90)
-            batteryStatus = "full";
-        else if (data.Battery.Perc > 60)
-            batteryStatus = "three-quarters";
-        else if (data.Battery.Perc > 40)
-            batteryStatus = "half";
-        else if (data.Battery.Perc > 15)
-            batteryStatus = "quarter";
-        else
-            batteryStatus = "empty";
-
-        nextZone = config.MultiZones[0] > 0 ? (config.MultiZonePercs[data.LastZone] + 1).ToString() : "-";
     }
 
-    public async Task GetTimePannings()
+    private void GetTimePannings()
     {
         var response = Manager.GetTimePlannings(new GetTimePlanningsRequest() { Username = "roberto.gualandris@hotmail.it" });
         Plannings = response.Plannings;
     }
 
-    private void HandleValidSubmit()
-    {
-        Console.WriteLine("OnValidSubmit");
-    }
 
-    public void OnButtonClicked()
+    public async Task OnButtonClicked()
     {
+        var interop = new Interop(JSRuntime);
+        await interop.Overlay(true);
         if (Plannings.Any(p => p.Duration <= 0))
         {
-            modalText = "Duration can not be equal or less then 0";
-            validationModal.Show();
+            await interop.Overlay(false);
+            await interop.ShowSwallAlert("warning", "Attention", "Duration can not be equal or less then 0", "OK", null, null);
             return;
         }
-        Manager.SaveTimePlanningsRequest(new SaveTimePlanningsRequest() { Plannings = Plannings, SerialNumber = serialNumber });
+        Manager.SaveTimePlanningsRequest(new SaveTimePlanningsRequest() { Username = username, Plannings = Plannings, SerialNumber = serialNumber, WorkPercentage = config.Schedule.Perc });
+        await interop.Overlay(false);
+        await interop.ShowSwallAlert("success", "Save Scheduler", "Scheduler saved", "OK", null, null);
     }
 
-    public void AddTimeSchedule()
+    public async Task AddTimeSchedule()
     {
         Plannings.Add(new TimePlanning_BL() { DayOfWeek = selectedTab, Username = "roberto.gualandris@hotmail.it", });
+        await Task.Delay(500);
+        await interop.RenderPickers("time-picker");
     }
 
     public void DeleteTimeSchedule(TimePlanning_BL time)
