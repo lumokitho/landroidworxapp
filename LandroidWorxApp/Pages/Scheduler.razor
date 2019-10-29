@@ -163,7 +163,7 @@
 
     private void GetTimePannings()
     {
-        var response = Manager.GetTimePlannings(new GetTimePlanningsRequest() { Username = "roberto.gualandris@hotmail.it" });
+        var response = Manager.GetTimePlannings(new GetTimePlanningsRequest() { Username = username  });
         Plannings = response.Plannings;
     }
 
@@ -185,7 +185,7 @@
 
     public async Task AddTimeSchedule()
     {
-        Plannings.Add(new TimePlanning_BL() { DayOfWeek = selectedTab, Username = "roberto.gualandris@hotmail.it", });
+        Plannings.Add(new TimePlanning_BL() { DayOfWeek = selectedTab, Username = username, });
         await Task.Delay(500);
         await interop.RenderPickers("time-picker");
     }
