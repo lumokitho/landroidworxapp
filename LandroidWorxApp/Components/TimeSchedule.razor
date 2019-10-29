@@ -16,6 +16,7 @@
     </Column>
     @if (Config.MultiZones != null && Config.MultiZones.Any(z => z > 0))
     {
+        if (!Planning.Zone.HasValue) Planning.Zone = 0;
         <Column ColumnSize="ColumnSize.Is4.Is3.OnDesktop">
             <Field>
                 <FieldLabel><b>Zone</b></FieldLabel>
